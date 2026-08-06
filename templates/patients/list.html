@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Pacientes activos — OAFCare{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/patients.css') }}">
+{% endblock %}
+{% block content %}
+<h2>📋 Pacientes activos — {{ hoy }}</h2>
+<div style="display:flex; justify-content:center; gap:10px; margin-bottom:16px;">
+    <a href="{{ url_for('patients.listar_pacientes') }}" style="
+        background:#22c55e; color:white; padding:8px 20px;
+        border-radius:8px; text-decoration:none; font-weight:bold;">
+        🟢 Activos
+    </a>
+    <a href="{{ url_for('patients.pacientes_alta') }}" style="
+        background:#64748b; color:white; padding:8px 20px;
+        border-radius:8px; text-decoration:none; font-weight:bold;">
+        ✅ Altas
+    </a>
+</div>
+<table>
+    <thead>
+        <tr>
+            <th>HC</th><th>Nombre</th><th>Fecha inicio OAF</th><th>Edición</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for p in pacientes %}
+    <tr>
+        <td>{{ p['hc'] }}</td>
+        <td>{{ p['nombre'] }}</td>
+        <td>{{ p['fecha_inicio_oaf'] or '' }}</td>
+        <td>
+            {% if p['ultimo_registro'] and current_user.rol in ('admin', 'editor') %}
+            <a class="btn-editar" href="{{ url_for('patients.editar_ultima', hc=p['hc']) }}">Editar última entrada</a>
+            {% endif %}
+            {% if current_user.rol == 'admin' %}
+            <form action="{{ url_for('patients.borrar', hc=p['hc']) }}" method="post"
+                  style="display:inline; margin-top:6px;"
+                  onsubmit="return confirm('¿Borrar DEFINITIVAMENTE al paciente {{ p['nombre'] }} (HC {{ p['hc'] }})?\n\nSe eliminarán todas sus atenciones e historial. Esta acción NO se puede deshacer.');">
+                <button type="submit" style="
+                    background:#dc2626; color:white; border:none;
+                    padding:6px 12px; border-radius:6px; cursor:pointer;
+                    font-weight:bold;">
+                    🗑 Borrar paciente
+                </button>
+            </form>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

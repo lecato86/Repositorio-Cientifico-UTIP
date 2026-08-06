@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Estadísticas — OAFCare{% endblock %}
+{% block content %}
+<h2>📊 Estadísticas — Pacientes en OAF por día</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>Pacientes en OAF</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for d in datos %}
+    <tr>
+        <td>{{ d[0] }}</td>
+        <td>{{ d[1] }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="2" style="text-align:center;color:#64748b;">Sin datos todavía.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

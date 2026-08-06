@@ -1,0 +1,270 @@
+/* base.css — shared light-theme styles used across most pages */
+
+/* OAFCare brand identity: light-green scale + deep-green ink */
+:root {
+    --sc-navy: #14532D;
+    --sc-teal: #4ADE80;
+    --sc-cyan: #22C55E;
+    --sc-blue: #16A34A;
+    --sc-grad: linear-gradient(90deg, #4ADE80 0%, #22C55E 52%, #16A34A 100%);
+    --sc-ink: #12211A;
+    --sc-muted: #5B7365;
+    --sc-line: #dcece2;
+    --sc-field: #f4fbf6;
+    --sc-field-line: #cde8d8;
+    --sc-shadow: 0 10px 30px rgba(20, 83, 45, .10);
+    --sc-shadow-sm: 0 2px 10px rgba(20, 83, 45, .08);
+    --sc-radius: 14px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+    background: #f4fbf7;
+    margin: 0;
+    background-image: url("/static/fondo.jpg");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: var(--sc-ink);
+}
+
+/* Frosted-glass overlay for pages that use the background image */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(3px);
+    z-index: 0;
+}
+
+/* Header / nav — Opción A: barra blanca con acento de gradiente */
+.header {
+    background: white;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 14px rgba(20, 83, 45, 0.08);
+    position: relative;
+    z-index: 2;
+    border-bottom: 3px solid transparent;
+    border-image: var(--sc-grad) 1;
+}
+
+.header h2 {
+    margin: 0;
+    color: var(--sc-navy);
+}
+
+/* Brand wordmark next to the logo */
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding-right: 8px;
+    text-decoration: none;
+}
+
+.brand .wordmark {
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: -.3px;
+    white-space: nowrap;
+}
+
+.brand .wordmark .stat {
+    color: var(--sc-navy);
+}
+
+.brand .wordmark .care {
+    background: var(--sc-grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.nav a {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    text-decoration: none;
+    color: var(--sc-muted);
+    font-weight: 600;
+    font-size: 14px;
+    padding: 8px 12px;
+    border-radius: 9px;
+    transition: background .15s, color .15s;
+}
+
+.nav a svg {
+    width: 16px;
+    height: 16px;
+    flex: none;
+}
+
+.nav a:hover {
+    background: rgba(34, 197, 94, 0.12);
+    color: var(--sc-cyan);
+}
+
+.nav a.active {
+    background: var(--sc-grad);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.35);
+}
+
+.nav a.active svg {
+    stroke: #fff;
+}
+
+/* Logout keeps its warning color */
+.nav a.nav-logout {
+    color: #d1495b;
+}
+
+.nav a.nav-logout:hover {
+    background: rgba(209, 73, 91, 0.12);
+    color: #d1495b;
+}
+
+/* Content wrapper */
+.content {
+    padding: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+h2 {
+    text-align: center;
+    color: #0f172a;
+}
+
+h2, h3 {
+    text-align: center;
+    color: #0f172a;
+}
+
+/* Tables */
+table {
+    border-collapse: collapse;
+    width: 95%;
+    margin: 0 auto;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+th {
+    background: var(--sc-navy);
+    color: white;
+    padding: 12px;
+    text-align: left;
+}
+
+td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+tr:hover td {
+    background: #f0fdf4;
+}
+
+/* Card */
+.card {
+    background: white;
+    margin: 40px auto;
+    padding: 0;
+    border-radius: var(--sc-radius);
+    max-width: 560px;
+    width: 90%;
+    box-shadow: var(--sc-shadow-sm);
+    border: 1px solid var(--sc-line);
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+}
+
+/* Form inputs */
+input, select, textarea {
+    width: 100%;
+    padding: 10px 12px;
+    margin: 5px 0;
+    box-sizing: border-box;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--sc-ink);
+    background: var(--sc-field);
+    border: 1px solid var(--sc-field-line);
+    border-radius: 10px;
+    transition: border-color .15s, box-shadow .15s, background .15s;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--sc-cyan);
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.22);
+    background: #fff;
+}
+
+/* Buttons */
+button {
+    background: var(--sc-grad);
+    color: white;
+    border: none;
+    padding: 12px;
+    width: 100%;
+    border-radius: 11px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 15px;
+    box-shadow: 0 6px 16px rgba(34, 197, 94, 0.28);
+    transition: filter .15s, transform .15s;
+}
+
+button:hover {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+}
+
+/* Fixed footer signature */
+.firma {
+    position: fixed;
+    bottom: 12px;
+    right: 16px;
+    font-size: 11px;
+    color: #4b5563;
+    font-style: italic;
+}
+
+/* Acciones bar (e.g. evolution page) */
+.acciones {
+    text-align: center;
+    margin-bottom: 18px;
+}
+
+.acciones a {
+    display: inline-block;
+    background: var(--sc-grad);
+    color: white;
+    padding: 9px 14px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.28);
+}

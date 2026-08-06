@@ -1,0 +1,138 @@
+{# Wizard de ingreso compartido por "nuevo" (home) y "editar última" (edit).
+   Variables de contexto esperadas (todas con default para el caso "nuevo"):
+     form_action   URL de POST (obligatoria)
+     submit_label  texto del botón final
+     p             dict con los valores del paciente ({} si es nuevo)
+     edad_anios, edad_meses
+     virus_vals    dict {clave: estado}
+     comorb_sel    lista de comorbilidades marcadas
+     complic_sel   lista de complicaciones marcadas
+     med_vals      dict {'med_fc_t0': '150', ...}
+     hc_readonly   True para no permitir cambiar la HC al editar
+#}
+{% from "macros/forms.html" import edad_selects, sexo_select, sala_derivacion_radios, virus_panel, comorbilidad_checkboxes, radio_group, checkbox_group, mediciones_tabla with context %}
+{% set p = p if p is defined else {} %}
+{% set virus_vals = virus_vals if virus_vals is defined else {} %}
+{% set comorb_sel = comorb_sel if comorb_sel is defined else [] %}
+{% set complic_sel = complic_sel if complic_sel is defined else [] %}
+{% set med_vals = med_vals if med_vals is defined else {} %}
+{% set edad_anios = edad_anios if edad_anios is defined else 0 %}
+{% set edad_meses = edad_meses if edad_meses is defined else 0 %}
+
+<div class="card ingreso">
+    <div class="fc-head">
+        <h3>{{ titulo if titulo is defined else 'Registrar ingreso de paciente' }}</h3>
+        <ol class="stepper" aria-hidden="true">
+            <li class="is-current" data-dot="1">Datos</li>
+            <li data-dot="2">Inicio OAF</li>
+            <li data-dot="3">Virus</li>
+            <li data-dot="4">Comorb. / Complic.</li>
+            <li data-dot="5">Monitoreo</li>
+            <li data-dot="6">Resultados</li>
+        </ol>
+    </div>
+
+    <form class="form-body wizard" method="POST" action="{{ form_action }}" novalidate>
+
+        {# ---------- Paso 1: datos del paciente ---------- #}
+        <section class="wizard-step" data-step="1">
+            <div class="ingreso-grid">
+                <label class="col-span-2">Nombre y apellido
+                    <input name="nombre" placeholder="Nombre y apellido" required
+                           value="{{ p.get('nombre', '') }}">
+                </label>
+                <label>HC
+                    <input name="hc" placeholder="HC" required
+                           value="{{ p.get('hc', '') }}"
+                           {% if hc_readonly %}readonly{% endif %}>
+                </label>
+                <label>Sexo
+                    {{ sexo_select(p.get('sexo', '')) }}
+                </label>
+                <label>Peso
+                    <span class="peso-row">
+                        <input name="peso" placeholder="Peso" inputmode="decimal"
+                               value="{{ p.get('peso', '') }}">
+                        <span class="peso-unidad">Kg</span>
+                    </span>
+                </label>
+                <div class="col-span-2">
+                    <span class="field-label">Edad</span>
+                    {{ edad_selects(edad_anios, edad_meses, max_anios=14) }}
+                </div>
+                <label class="col-span-full">Diagnóstico
+                    <input name="diagnostico" placeholder="Dx." value="{{ p.get('diagnostico', '') }}">
+                </label>
+                <div class="col-span-full">
+                    <span class="field-label">¿De qué sala viene derivado?</span>
+                    {{ sala_derivacion_radios(p.get('sala_derivacion', '')) }}
+                </div>
+            </div>
+        </section>
+
+        {# ---------- Paso 2: inicio de OAF ---------- #}
+        <section class="wizard-step" data-step="2" hidden>
+            <div class="ingreso-grid">
+                <label>Fecha de inicio de OAF
+                    <input type="date" name="fecha_inicio_oaf" value="{{ p.get('fecha_inicio_oaf', '') }}">
+                </label>
+                <label>Hora de inicio de OAF
+                    <input type="time" name="hora_inicio_oaf" value="{{ p.get('hora_inicio_oaf', '') }}">
+                </label>
+                <label>Fecha de inicio de alimentación
+                    <input type="date" name="fecha_inicio_alimentacion" value="{{ p.get('fecha_inicio_alimentacion', '') }}">
+                </label>
+                <div class="col-span-full">
+                    <span class="field-label">Soporte previo al inicio de OAF</span>
+                    {{ radio_group('soporte_previo_oaf', SOPORTES_PREVIOS, p.get('soporte_previo_oaf', '')) }}
+                </div>
+                <div class="col-span-full">
+                    <span class="field-label">Lugar de inicio de OAF</span>
+                    {{ radio_group('lugar_inicio_oaf', LUGARES_INICIO, p.get('lugar_inicio_oaf', '')) }}
+                </div>
+            </div>
+        </section>
+
+        {# ---------- Paso 3: virus ---------- #}
+        <section class="wizard-step" data-step="3" hidden>
+            {{ virus_panel(virus_vals, p.get('virus_otro_detalle', '')) }}
+        </section>
+
+        {# ---------- Paso 4: comorbilidades y complicaciones ---------- #}
+        <section class="wizard-step" data-step="4" hidden>
+            <span class="field-label">Comorbilidad (podés marcar varias)</span>
+            {{ comorbilidad_checkboxes(comorb_sel) }}
+            <span class="field-label" style="margin-top:16px;">Complicaciones (podés marcar varias)</span>
+            {{ checkbox_group('complicacion', COMPLICACIONES, complic_sel) }}
+        </section>
+
+        {# ---------- Paso 5: tabla de monitoreo ---------- #}
+        <section class="wizard-step" data-step="5" hidden>
+            {{ mediciones_tabla(med_vals) }}
+        </section>
+
+        {# ---------- Paso 6: resultados ---------- #}
+        <section class="wizard-step" data-step="6" hidden>
+            <div class="ingreso-grid">
+                <label>Fecha de fin de soporte de OAF
+                    <input type="date" name="fecha_fin_oaf" value="{{ p.get('fecha_fin_oaf', '') }}">
+                </label>
+                <label>Hora de fin de soporte de OAF
+                    <input type="time" name="hora_fin_oaf" value="{{ p.get('hora_fin_oaf', '') }}">
+                </label>
+                <div class="col-span-full">
+                    <span class="field-label">Resultado</span>
+                    {{ radio_group('resultado_oaf', RESULTADOS_OAF, p.get('resultado_oaf', '')) }}
+                </div>
+            </div>
+        </section>
+
+        {# ---------- Navegación ---------- #}
+        <div class="wizard-nav">
+            <button type="button" class="btn-ghost" data-prev disabled>← Anterior</button>
+            <span class="wizard-progress">Paso <b data-current>1</b> de <span data-total>6</span></span>
+            <button type="button" class="btn-next" data-next>Siguiente →</button>
+            <button type="submit" class="btn-submit" hidden>{{ submit_label if submit_label is defined else 'Guardar ingreso' }}</button>
+        </div>
+    </form>
+</div>

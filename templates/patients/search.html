@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Buscador — OAFCare{% endblock %}
+{% block extra_css %}
+<style>
+    .search-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 20px auto;
+        max-width: 500px;
+    }
+    .search-box input {
+        flex: 1;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        font-size: 15px;
+        height: 42px;
+        box-sizing: border-box;
+        width: auto;
+    }
+    .search-box button {
+        padding: 0 20px;
+        height: 42px;
+        width: auto;
+        border-radius: 8px;
+        background: #22c55e;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<h2>🔍 Buscador de pacientes</h2>
+<form method="get" class="search-box">
+    <input name="q" value="{{ query or '' }}" placeholder="Nombre o HC..." autofocus>
+    <button type="submit">Buscar</button>
+</form>
+
+{% if deduplicacion_pendiente %}
+<div style="max-width:900px; margin:0 auto 16px; padding:12px; border-radius:8px; background:#fff7ed; color:#9a3412;">
+    Hay historias clínicas duplicadas pendientes de revisar:
+    {% for d in deduplicacion_pendiente %}
+        <b>{{ d['hc_normalizado'] }}</b> ({{ d['cantidad'] }}){% if not loop.last %}, {% endif %}
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if query and not resultados %}
+<p style="text-align:center; color:#64748b;">Sin resultados para <b>{{ query }}</b></p>
+{% endif %}
+
+{% if resultados %}
+<table>
+    <thead>
+        <tr>
+            <th>HC</th>
+            <th>Nombre</th>
+            <th>Edad</th>
+            <th>Diagnóstico</th>
+            <th>Soporte</th>
+            <th>TQ</th>
+            <th>Sala</th>
+            <th>Última actualización</th>
+            <th>Exportar</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for p in resultados %}
+    <tr>
+        <td>{{ p['hc'] }}</td>
+        <td>{{ p['nombre'] }}</td>
+        <td>{{ p['edad'] | formato_edad }}</td>
+        <td>{{ p['diagnostico'] }}</td>
+        <td>{{ p['soporte'] }}</td>
+        <td>{{ 'SI' if p['tq'] else 'NO' }}</td>
+        <td>{{ p['sala'] }}</td>
+        <td>{{ p['ultima_actualizacion'] }}</td>
+        <td><a href="{{ url_for('patients.exportar_paciente', hc=p['hc']) }}">Exportar</a></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+{% endblock %}

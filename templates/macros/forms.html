@@ -1,0 +1,164 @@
+{# templates/macros/forms.html #}
+{% macro edad_selects(edad_anios=0, edad_meses=0, max_anios=120) %}
+<div class="edad-grid">
+    <label>Años
+        <select name="edad_anios">
+            {% for i in range(max_anios + 1) %}
+            <option value="{{ i }}" {% if i == edad_anios %}selected{% endif %}>{{ i }}</option>
+            {% endfor %}
+        </select>
+    </label>
+    <label>Meses
+        <select name="edad_meses_extra">
+            {% for i in range(12) %}
+            <option value="{{ i }}" {% if i == edad_meses %}selected{% endif %}>{{ i }}</option>
+            {% endfor %}
+        </select>
+    </label>
+</div>
+{% endmacro %}
+
+{% macro sexo_select(seleccionado='') %}
+<select name="sexo">
+    <option value="" disabled {% if not seleccionado %}selected{% endif %}>Sexo</option>
+    {% for s in SEXOS %}
+    <option value="{{ s }}" {% if s == seleccionado %}selected{% endif %}>{{ s }}</option>
+    {% endfor %}
+</select>
+{% endmacro %}
+
+{% macro sala_derivacion_radios(seleccionada='') %}
+<div class="checkbox-list">
+    {% for sala in SALAS_DERIVACION %}
+    <label class="inline-check">
+        <input type="radio" name="sala_derivacion" value="{{ sala }}" {% if sala == seleccionada %}checked{% endif %}>
+        {{ sala }}
+    </label>
+    {% endfor %}
+</div>
+{% endmacro %}
+
+{% macro virus_panel(valores={}, otro_detalle='') %}
+<div class="virus-panel">
+    {% for clave, etiqueta in VIRUS_PANEL %}
+    <div class="virus-row">
+        <span class="virus-name">{{ etiqueta }}</span>
+        <div class="virus-estados">
+            {% for estado in ESTADOS_VIRUS %}
+            <label class="inline-check">
+                <input type="radio" name="virus_{{ clave }}" value="{{ estado }}"
+                       {% if valores.get(clave) == estado %}checked{% endif %}>
+                {{ estado }}
+            </label>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+    <div class="virus-row virus-otro">
+        <span class="virus-name">Otro / Detalle</span>
+        <textarea name="virus_otro_detalle" rows="2"
+                  placeholder="Otro detalle...">{{ otro_detalle }}</textarea>
+    </div>
+</div>
+{% endmacro %}
+
+{% macro comorbilidad_checkboxes(seleccionadas=[]) %}
+<div class="checkbox-list comorbilidad-list">
+    {% for c in COMORBILIDADES %}
+    <label class="inline-check">
+        <input type="checkbox" name="comorbilidad" value="{{ c }}"
+               {% if c in seleccionadas %}checked{% endif %}>
+        {{ c }}
+    </label>
+    {% endfor %}
+</div>
+{% endmacro %}
+
+{# Grupo de opción única (radio) genérico #}
+{% macro radio_group(name, opciones, seleccionado='') %}
+<div class="checkbox-list">
+    {% for op in opciones %}
+    <label class="inline-check">
+        <input type="radio" name="{{ name }}" value="{{ op }}"
+               {% if op == seleccionado %}checked{% endif %}>
+        {{ op }}
+    </label>
+    {% endfor %}
+</div>
+{% endmacro %}
+
+{# Grupo de selección múltiple (checkbox) genérico #}
+{% macro checkbox_group(name, opciones, seleccionadas=[]) %}
+<div class="checkbox-list">
+    {% for op in opciones %}
+    <label class="inline-check">
+        <input type="checkbox" name="{{ name }}" value="{{ op }}"
+               {% if op in seleccionadas %}checked{% endif %}>
+        {{ op }}
+    </label>
+    {% endfor %}
+</div>
+{% endmacro %}
+
+{# Tabla de monitoreo: filas = tiempos, columnas = parámetros. valores es un
+   dict {'med_fc_t0': '120', ...} para repoblar (vacío al crear). #}
+{% macro mediciones_tabla(valores={}) %}
+<div class="med-table-wrap">
+    <table class="med-table">
+        <thead>
+            <tr>
+                <th class="med-th-tiempo">Tiempo</th>
+                {% for pk, pl in PARAMETROS_MEDICION %}
+                <th>{{ pl }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for tk, tl in TIEMPOS_MEDICION %}
+            <tr>
+                <th scope="row">{{ tl }}</th>
+                {% for pk, pl in PARAMETROS_MEDICION %}
+                <td><input name="med_{{ pk }}_{{ tk }}" inputmode="decimal"
+                           value="{{ valores.get('med_' ~ pk ~ '_' ~ tk, '') }}"></td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endmacro %}
+
+{% macro sala_select(seleccionada='') %}
+<select name="sala">
+    <option value="">-- Seleccionar --</option>
+    {% for sala in SALAS %}
+    <option value="{{ sala }}" {% if sala == seleccionada %}selected{% endif %}>{{ sala }}</option>
+    {% endfor %}
+</select>
+{% endmacro %}
+
+{% macro soporte_select(seleccionado='', tq=0) %}
+<span class="support-row">
+    <select name="soporte">
+        <option value="">-- Seleccionar --</option>
+        {% for sop in SOPORTES %}
+        <option value="{{ sop }}" {% if sop == seleccionado %}selected{% endif %}>{{ sop }}</option>
+        {% endfor %}
+    </select>
+    <label class="inline-check">
+        <input type="checkbox" name="tq" value="1" {% if tq %}checked{% endif %}>
+        TQ
+    </label>
+</span>
+{% endmacro %}
+
+{% macro muestra_checkboxes(seleccionadas=[]) %}
+<div class="checkbox-list">
+    {% for m in MUESTRAS %}
+    <label class="inline-check">
+        <input type="checkbox" name="muestra" value="{{ m }}" {% if m in seleccionadas %}checked{% endif %}>
+        {{ m }}
+    </label>
+    {% endfor %}
+</div>
+{% endmacro %}

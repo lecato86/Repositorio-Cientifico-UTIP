@@ -1,0 +1,28 @@
+# Entorno / secretos (NUNCA commitear)
+.env
+
+# Base de datos local SQLite
+*.db
+pacientes.db
+
+# Backups (contienen datos de pacientes)
+backups/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Exports temporales que genera la app (contienen datos de pacientes)
+paciente_*.csv
+oafcare_pacientes.csv
+historial_por_paciente.csv
+
+# Editores / SO
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
