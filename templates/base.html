@@ -10,14 +10,24 @@
 <body>
 <div class="overlay"></div>
 <header class="header">
-    <a class="brand" href="{{ url_for('patients.home') }}">
-        <img src="{{ url_for('static', filename='logo.png') }}" alt="OAFCare" height="38"
+    <a class="brand" href="{{ url_for('estudios.inicio') }}">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Repositorio Científico UTIP" height="38"
              onerror="this.style.display='none'">
-        <span class="wordmark"><span class="stat">OAF</span><span class="care">Care</span></span>
+        <span class="wordmark"><span class="stat">Repositorio</span><span class="care">UTIP</span></span>
     </a>
     <nav class="nav">
-        <a href="{{ url_for('patients.home') }}" {% if request.endpoint == 'patients.home' %}class="active"{% endif %}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>Nuevo paciente</a>
+        <a href="{{ url_for('estudios.inicio') }}" {% if request.endpoint == 'estudios.inicio' %}class="active"{% endif %}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11l8-7 8 7M6 10v9h12v-9" stroke-linecap="round" stroke-linejoin="round"/></svg>Inicio</a>
+        <a href="{{ url_for('estudios.nueva') }}" {% if request.endpoint == 'estudios.nueva' %}class="active"{% endif %}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>Nueva investigación</a>
+        <a href="{{ url_for('estudios.repositorio') }}" {% if request.endpoint == 'estudios.repositorio' %}class="active"{% endif %}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>Repositorio</a>
+        <a href="{{ url_for('estudios.como_comenzar') }}" {% if request.endpoint == 'estudios.como_comenzar' %}class="active"{% endif %}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5.5A2 2 0 016 4h5v16H6a2 2 0 01-2-1.5z" stroke-linejoin="round"/><path d="M20 5.5A2 2 0 0018 4h-5v16h5a2 2 0 002-1.5z" stroke-linejoin="round"/></svg>Cómo comenzar</a>
+
+        {# Seguimiento de pacientes OAF: heredado de OAFCare, fuera del flujo
+           principal del repositorio. Queda accesible detrás del separador. #}
+        <span class="nav-sep" aria-hidden="true"></span>
         <a href="{{ url_for('patients.listar_pacientes') }}" {% if request.endpoint == 'patients.listar_pacientes' %}class="active"{% endif %}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h5" stroke-linecap="round"/></svg>Pacientes</a>
         <a href="{{ url_for('charts.estadisticas') }}" {% if request.endpoint == 'charts.estadisticas' %}class="active"{% endif %}>
@@ -42,7 +52,7 @@
 </main>
 
 <footer class="firma">
-    OAFCare — {{ current_user.username if current_user.is_authenticated else '' }}
+    Repositorio Científico UTIP — {{ current_user.username if current_user.is_authenticated else '' }}
 </footer>
 
 {% block extra_js %}{% endblock %}

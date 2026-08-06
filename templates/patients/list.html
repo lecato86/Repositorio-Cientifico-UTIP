@@ -16,6 +16,14 @@
         border-radius:8px; text-decoration:none; font-weight:bold;">
         ✅ Altas
     </a>
+    {% if current_user.rol in ('admin', 'editor') %}
+    {# El nav ya no lleva a este formulario: la entrada al ingreso OAF está acá. #}
+    <a href="{{ url_for('patients.nuevo_paciente') }}" style="
+        background:#16a34a; color:white; padding:8px 20px;
+        border-radius:8px; text-decoration:none; font-weight:bold;">
+        ➕ Nuevo paciente
+    </a>
+    {% endif %}
 </div>
 <table>
     <thead>

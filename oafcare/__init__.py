@@ -10,6 +10,7 @@ from .utils.ingreso import (
     SOPORTES_PREVIOS, LUGARES_INICIO, COMPLICACIONES, RESULTADOS_OAF,
     TIEMPOS_MEDICION, PARAMETROS_MEDICION,
 )
+from .utils.estudio import FUENTES_DATOS, FUENTE_DATOS_OTRA, TEMPORALIDADES
 
 
 def create_app(config_class=Config):
@@ -36,6 +37,11 @@ def create_app(config_class=Config):
     from .charts import charts_bp
     app.register_blueprint(charts_bp)
 
+    # Repositorio científico (investigaciones). Es el que sirve "/" y el menú
+    # principal; `patients` quedó con el seguimiento de pacientes OAF heredado.
+    from .estudios import estudios_bp
+    app.register_blueprint(estudios_bp)
+
     @app.context_processor
     def inject_globals():
         return {
@@ -53,6 +59,10 @@ def create_app(config_class=Config):
             "RESULTADOS_OAF": RESULTADOS_OAF,
             "TIEMPOS_MEDICION": TIEMPOS_MEDICION,
             "PARAMETROS_MEDICION": PARAMETROS_MEDICION,
+            # Formulario de investigaciones
+            "FUENTES_DATOS": FUENTES_DATOS,
+            "FUENTE_DATOS_OTRA": FUENTE_DATOS_OTRA,
+            "TEMPORALIDADES": TEMPORALIDADES,
         }
 
     app.jinja_env.filters["formato_edad"] = formato_edad

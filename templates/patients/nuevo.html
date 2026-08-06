@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Nueva entrada — OAFCare{% endblock %}
+{% block title %}Nuevo paciente OAF — Repositorio Científico UTIP{% endblock %}
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/patients.css') }}">
 {% endblock %}
@@ -8,6 +8,7 @@
 {% set submit_label = 'Guardar ingreso' %}
 {% set form_action = url_for('patients.guardar') %}
 {% include "patients/_ingreso_wizard.html" %}
+<a class="volver" href="{{ url_for('patients.listar_pacientes') }}">← Volver a pacientes</a>
 {% endblock %}
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/ingreso_wizard.js') }}"></script>

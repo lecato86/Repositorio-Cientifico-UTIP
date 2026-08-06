@@ -1,10 +1,11 @@
 {% extends "base.html" %}
-{% block title %}Editar entrada — OAFCare{% endblock %}
+{% block title %}Editar entrada — Repositorio Científico UTIP{% endblock %}
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/patients.css') }}">
 {% endblock %}
 {% block content %}
 {% include "patients/_ingreso_wizard.html" %}
+<a class="volver" href="{{ url_for('patients.listar_pacientes') }}">← Volver a pacientes</a>
 {% endblock %}
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/ingreso_wizard.js') }}"></script>

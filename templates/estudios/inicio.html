@@ -1,0 +1,97 @@
+﻿{% extends "base.html" %}
+{% block title %}Inicio â€” Repositorio CientÃ­fico UTIP{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/inicio.css') }}">
+{% endblock %}
+{% block content %}
+{# Las opciones que escriben en la base requieren rol editor o admin: para un
+   lector se muestran igual, pero deshabilitadas y con el motivo a la vista. #}
+{% set puede_editar = current_user.rol in ('admin', 'editor') %}
+
+<section class="inicio">
+    <header class="inicio-head">
+        <h1>Repositorio CientÃ­fico <span>UTIP</span></h1>
+        <p>Unidad de Terapia Intensiva PediÃ¡trica â€” elegÃ­ quÃ© querÃ©s hacer.</p>
+    </header>
+
+    <div class="inicio-grid">
+
+        {# ---------- 1. Cargar nueva investigaciÃ³n ---------- #}
+        {% if puede_editar %}
+        <a class="opcion" href="{{ url_for('estudios.nueva') }}">
+        {% else %}
+        <div class="opcion is-bloqueada" aria-disabled="true">
+        {% endif %}
+            <span class="opcion-icono">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M5 12h14" stroke-linecap="round"/>
+                </svg>
+            </span>
+            <span class="opcion-titulo">Cargar nueva investigaciÃ³n</span>
+            <span class="opcion-texto">
+                CompletÃ¡ el formulario paso a paso con los datos del caso y guardalo
+                en el repositorio.
+            </span>
+            <span class="opcion-cta">
+                {{ 'Comenzar carga â†’' if puede_editar else 'Requiere permisos de ediciÃ³n' }}
+            </span>
+        {% if puede_editar %}</a>{% else %}</div>{% endif %}
+
+        {# ---------- 2. Consultar repositorio ---------- #}
+        <a class="opcion" href="{{ url_for('estudios.repositorio') }}">
+            <span class="opcion-icono">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <ellipse cx="12" cy="6" rx="8" ry="3"/>
+                    <path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/>
+                    <path d="M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/>
+                </svg>
+            </span>
+            <span class="opcion-titulo">Consultar repositorio</span>
+            <span class="opcion-texto">
+                VisualizÃ¡ la base de datos completa: todas las investigaciones
+                cargadas con todos sus campos.
+            </span>
+            <span class="opcion-cta">Ver base de datos â†’</span>
+        </a>
+
+        {# ---------- 3. Modificar investigaciÃ³n cargada ---------- #}
+        {% if puede_editar %}
+        <a class="opcion" href="{{ url_for('estudios.modificar') }}">
+        {% else %}
+        <div class="opcion is-bloqueada" aria-disabled="true">
+        {% endif %}
+            <span class="opcion-icono">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 20h4l10-10a2.8 2.8 0 10-4-4L4 16v4z" stroke-linejoin="round"/>
+                    <path d="M13.5 6.5l4 4" stroke-linecap="round"/>
+                </svg>
+            </span>
+            <span class="opcion-titulo">Modificar investigaciÃ³n cargada</span>
+            <span class="opcion-texto">
+                BuscÃ¡ por nombre, revisÃ¡ todos los datos guardados y cambiÃ¡ lo que
+                haga falta. Al guardar se actualiza la base.
+            </span>
+            <span class="opcion-cta">
+                {{ 'Buscar por nombre â†’' if puede_editar else 'Requiere permisos de ediciÃ³n' }}
+            </span>
+        {% if puede_editar %}</a>{% else %}</div>{% endif %}
+
+        {# ---------- 4. CÃ³mo comenzar ---------- #}
+        <a class="opcion opcion-guia" href="{{ url_for('estudios.como_comenzar') }}">
+            <span class="opcion-icono">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 5.5A2 2 0 016 4h5v16H6a2 2 0 01-2-1.5z" stroke-linejoin="round"/>
+                    <path d="M20 5.5A2 2 0 0018 4h-5v16h5a2 2 0 002-1.5z" stroke-linejoin="round"/>
+                </svg>
+            </span>
+            <span class="opcion-titulo">CÃ³mo comenzar</span>
+            <span class="opcion-texto">
+                GuÃ­a para empezar a investigar en la UTIP, con los documentos en
+                PDF para descargar.
+            </span>
+            <span class="opcion-cta">Leer la guÃ­a â†’</span>
+        </a>
+
+    </div>
+</section>
+{% endblock %}

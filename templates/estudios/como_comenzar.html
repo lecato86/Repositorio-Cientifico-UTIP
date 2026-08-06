@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}Cómo comenzar — Repositorio Científico UTIP{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/repositorio.css') }}">
+{% endblock %}
+{% block content %}
+{% set puede_editar = current_user.rol in ('admin', 'editor') %}
+
+<section class="guia">
+    <header class="repo-head">
+        <div>
+            <h1>Cómo comenzar</h1>
+            <p>Guía para empezar a investigar en la UTIP y material para descargar.</p>
+        </div>
+        <a class="repo-volver" href="{{ url_for('estudios.inicio') }}">← Inicio</a>
+    </header>
+
+    <div class="guia-bloque">
+        <h2>Documentos para descargar</h2>
+        <p>Material de consulta en PDF: protocolos, instructivos y formularios.</p>
+
+        {% if documentos %}
+        <ul class="doc-lista">
+            {% for doc in documentos %}
+            <li>
+                <a href="{{ url_for('static', filename=doc.archivo) }}" download>
+                    <span class="doc-icono">PDF</span>
+                    <span>
+                        <span class="doc-nombre">{{ doc.titulo }}</span>
+                        <span class="doc-peso">{{ doc.kb }} KB</span>
+                    </span>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="doc-vacio">
+            Todavía no hay documentos publicados. Para publicar uno, copiá el PDF
+            en <code>static/docs/</code> y aparece solo en esta lista.
+        </p>
+        {% endif %}
+    </div>
+
+    <div class="guia-bloque">
+        <h2>Cómo cargar una investigación</h2>
+        <p>El recorrido desde que tenés un estudio en mente hasta que queda cargado.</p>
+
+        <ol class="guia-pasos">
+            <li>
+                <div>
+                    <h3>Definí el estudio antes de cargarlo</h3>
+                    <p>
+                        Tené claro el título, el tema, de dónde van a salir los datos
+                        y la temporalidad. Son las preguntas del apartado
+                        <b>Sobre el estudio</b>, y conviene resolverlas antes de
+                        sentarse a completar el formulario.
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div>
+                    <h3>Cargá la investigación</h3>
+                    <p>
+                        Entrá a
+                        {% if puede_editar %}
+                        <a href="{{ url_for('estudios.nueva') }}">Cargar nueva investigación</a>
+                        {% else %}
+                        <b>Cargar nueva investigación</b>
+                        {% endif %}
+                        y completá los apartados. Lo único obligatorio para guardar es
+                        el título; el resto se puede completar después.
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div>
+                    <h3>Si elegís "otras fuentes", especificá cuáles</h3>
+                    <p>
+                        En la pregunta sobre el origen de los datos, la opción
+                        <b>De otras fuentes</b> habilita un campo de texto para
+                        detallarlas. Ese detalle se guarda solo si esa opción queda
+                        elegida.
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div>
+                    <h3>Verificá que quedó cargada</h3>
+                    <p>
+                        Después de guardar vas a caer en
+                        <a href="{{ url_for('estudios.repositorio') }}">Consultar repositorio</a>,
+                        donde se ve la base completa. Buscá tu investigación con el
+                        filtro y revisá que los campos estén como los cargaste.
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div>
+                    <h3>Corregí o completá cuando haga falta</h3>
+                    <p>
+                        Con
+                        {% if puede_editar %}
+                        <a href="{{ url_for('estudios.modificar') }}">Modificar investigación cargada</a>
+                        {% else %}
+                        <b>Modificar investigación cargada</b>
+                        {% endif %}
+                        buscás por título, se abre el formulario con todo lo guardado y
+                        cambiás lo que necesites.
+                    </p>
+                </div>
+            </li>
+        </ol>
+    </div>
+
+    <div class="guia-bloque">
+        <h2>Cosas para tener en cuenta</h2>
+        <ol class="guia-pasos">
+            <li>
+                <div>
+                    <h3>Quién cargó cada investigación queda registrado</h3>
+                    <p>
+                        Al guardar se anota tu usuario y la fecha, y cada modificación
+                        actualiza la fecha de última edición. Se ve en el repositorio.
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div>
+                    <h3>Los títulos pueden repetirse</h3>
+                    <p>
+                        Nada impide cargar dos investigaciones con el mismo título,
+                        pero después la búsqueda por título te va a devolver las dos.
+                        Usá títulos que se distingan.
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div>
+                    <h3>Permisos</h3>
+                    <p>
+                        Consultar el repositorio está disponible para todos los
+                        usuarios. Cargar y modificar requiere rol de editor o
+                        administrador; borrar, de administrador.
+                    </p>
+                </div>
+            </li>
+        </ol>
+    </div>
+</section>
+{% endblock %}

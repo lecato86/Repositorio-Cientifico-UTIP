@@ -1,0 +1,542 @@
+/* repositorio.css — pantallas de consulta, modificación y guía.
+   Cubre: "Consultar repositorio" (.repo), "Modificar investigación" (.buscar-inv)
+   y "Cómo comenzar" (.guia). */
+
+/* ============================================================
+   Encabezado común de estas pantallas
+   ============================================================ */
+.repo,
+.buscar-inv,
+.guia {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding-bottom: 40px;
+}
+
+.buscar-inv,
+.guia {
+    max-width: 860px;
+}
+
+.repo-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin: 12px 0 20px;
+}
+
+.repo-head h1 {
+    margin: 0;
+    font-size: 25px;
+    font-weight: 800;
+    letter-spacing: -.4px;
+    color: var(--sc-navy);
+    text-align: left;
+}
+
+.repo-head p {
+    margin: 6px 0 0;
+    color: var(--sc-muted);
+    font-size: 13.5px;
+}
+
+.repo-volver {
+    flex: none;
+    padding: 9px 15px;
+    border-radius: 9px;
+    background: white;
+    border: 1px solid var(--sc-line);
+    color: var(--sc-muted);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.repo-volver:hover {
+    border-color: var(--sc-teal);
+    color: var(--sc-blue);
+}
+
+/* ============================================================
+   Banda de contadores
+   ============================================================ */
+.repo-resumen {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.tile {
+    background: white;
+    border: 1px solid var(--sc-line);
+    border-radius: 12px;
+    padding: 14px 16px;
+    box-shadow: var(--sc-shadow-sm);
+}
+
+.tile-valor {
+    display: block;
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--sc-navy);
+}
+
+.tile-label {
+    display: block;
+    margin-top: 3px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--sc-muted);
+}
+
+/* ============================================================
+   Barra de filtro
+   ============================================================ */
+.repo-barra {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.repo-barra input {
+    flex: 1;
+    width: auto;
+    margin: 0;
+    height: 42px;
+}
+
+.repo-conteo {
+    flex: none;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--sc-muted);
+    white-space: nowrap;
+}
+
+/* ============================================================
+   Tabla ancha del repositorio
+   ============================================================ */
+.repo-tabla-wrap {
+    overflow-x: auto;
+    background: white;
+    border: 1px solid var(--sc-line);
+    border-radius: 12px;
+    box-shadow: var(--sc-shadow-sm);
+}
+
+/* Anula el ancho/centrado global de `table` de base.css */
+.repo-tabla {
+    width: max-content;
+    min-width: 100%;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 12.5px;
+}
+
+.repo-tabla th,
+.repo-tabla td {
+    padding: 8px 11px;
+    text-align: left;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--sc-line);
+    background: white;
+}
+
+.repo-tabla thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: var(--sc-navy);
+    color: white;
+    font-size: 11.5px;
+    font-weight: 700;
+}
+
+/* Fila de grupos: un tono más claro y separadores entre bloques */
+.repo-tabla .repo-grupos th {
+    top: 0;
+    background: #0d3d20;
+    font-size: 11px;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    border-right: 1px solid rgba(255, 255, 255, .18);
+    text-align: center;
+}
+
+/* La segunda fila del thead se pega debajo de la de grupos */
+.repo-tabla thead tr:last-child th {
+    top: 31px;
+}
+
+.repo-tabla .repo-acciones-th {
+    top: 0;
+    text-align: center;
+}
+
+.repo-tabla tbody tr:hover td {
+    background: #f0fdf4;
+}
+
+/* Columnas con texto largo (enunciados, opciones completas): en vez de estirar
+   la tabla a lo ancho, se limitan y parten en varias líneas. */
+.repo-larga {
+    white-space: normal;
+    min-width: 220px;
+    max-width: 340px;
+    line-height: 1.4;
+}
+
+/* Columnas fijas al scrollear en horizontal */
+.repo-fija {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+}
+
+.repo-fija-titulo {
+    min-width: 240px;
+    max-width: 320px;
+    white-space: normal;
+    font-weight: 600;
+    line-height: 1.35;
+    border-right: 1px solid var(--sc-line);
+}
+
+/* En el thead las fijas tienen que ganarle a las sticky de arriba */
+.repo-tabla thead .repo-fija {
+    z-index: 4;
+}
+
+.repo-tabla tbody tr:hover .repo-fija {
+    background: #f0fdf4;
+}
+
+/* Acciones por fila */
+.repo-acciones {
+    text-align: center;
+    white-space: nowrap;
+}
+
+.repo-acciones .btn-editar {
+    padding: 5px 10px;
+    font-size: 11.5px;
+}
+
+.repo-borrar {
+    display: inline;
+    margin-left: 6px;
+}
+
+.repo-borrar button {
+    width: auto;
+    padding: 5px 10px;
+    font-size: 11.5px;
+    font-weight: 700;
+    border-radius: 8px;
+    background: #dc2626;
+    box-shadow: none;
+}
+
+.btn-sec {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 5px 10px;
+    font-size: 11.5px;
+    font-weight: 700;
+    border-radius: 8px;
+    text-decoration: none;
+    background: var(--sc-field);
+    border: 1px solid var(--sc-field-line);
+    color: var(--sc-muted);
+}
+
+.btn-sec:hover {
+    border-color: var(--sc-teal);
+    color: var(--sc-blue);
+}
+
+.repo-nota {
+    margin: 12px 0 0;
+    font-size: 12.5px;
+    color: var(--sc-muted);
+    text-align: center;
+}
+
+.repo-vacio {
+    background: white;
+    border: 1px dashed var(--sc-field-line);
+    border-radius: 12px;
+    padding: 34px 20px;
+    text-align: center;
+    color: var(--sc-muted);
+    font-size: 14.5px;
+}
+
+/* ============================================================
+   Modificar investigación: búsqueda por nombre
+   ============================================================ */
+.inv-card {
+    background: white;
+    border: 1px solid var(--sc-line);
+    border-radius: var(--sc-radius);
+    box-shadow: var(--sc-shadow-sm);
+    padding: 24px 26px;
+}
+
+.inv-card p.ayuda {
+    margin: 0 0 16px;
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--sc-muted);
+}
+
+.inv-buscar {
+    display: flex;
+    gap: 10px;
+}
+
+.inv-buscar input {
+    flex: 1;
+    width: auto;
+    margin: 0;
+    height: 44px;
+}
+
+.inv-buscar button {
+    flex: none;
+    width: auto;
+    padding: 0 24px;
+    height: 44px;
+}
+
+.inv-resultados {
+    list-style: none;
+    margin: 20px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.inv-resultados li a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 13px 16px;
+    border: 1px solid var(--sc-line);
+    border-radius: 11px;
+    text-decoration: none;
+    color: inherit;
+    background: var(--sc-field);
+    transition: border-color .15s, background .15s;
+}
+
+.inv-resultados li a:hover {
+    border-color: var(--sc-teal);
+    background: white;
+}
+
+.inv-nombre {
+    font-weight: 700;
+    color: var(--sc-navy);
+    font-size: 14.5px;
+}
+
+.inv-meta {
+    display: block;
+    margin-top: 2px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--sc-muted);
+}
+
+.inv-flecha {
+    flex: none;
+    font-weight: 700;
+    color: var(--sc-blue);
+    font-size: 13px;
+}
+
+.inv-sin-resultados {
+    margin: 20px 0 0;
+    padding: 18px;
+    border-radius: 11px;
+    background: #fff7ed;
+    color: #9a3412;
+    font-size: 13.5px;
+    text-align: center;
+}
+
+/* ============================================================
+   Cómo comenzar
+   ============================================================ */
+.guia-bloque {
+    background: white;
+    border: 1px solid var(--sc-line);
+    border-radius: var(--sc-radius);
+    box-shadow: var(--sc-shadow-sm);
+    padding: 24px 26px;
+    margin-bottom: 18px;
+}
+
+.guia-bloque h2 {
+    margin: 0 0 4px;
+    text-align: left;
+    font-size: 18px;
+    color: var(--sc-navy);
+}
+
+.guia-bloque > p {
+    margin: 0 0 14px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--sc-muted);
+}
+
+/* Pasos numerados */
+.guia-pasos {
+    list-style: none;
+    counter-reset: paso;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.guia-pasos > li {
+    counter-increment: paso;
+    display: grid;
+    grid-template-columns: 30px 1fr;
+    gap: 14px;
+    align-items: start;
+}
+
+.guia-pasos > li::before {
+    content: counter(paso);
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    background: var(--sc-grad);
+    color: white;
+    font-weight: 800;
+    font-size: 13.5px;
+}
+
+.guia-pasos h3 {
+    margin: 4px 0 3px;
+    text-align: left;
+    font-size: 14.5px;
+    color: var(--sc-navy);
+}
+
+.guia-pasos p {
+    margin: 0;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--sc-muted);
+}
+
+/* Lista de PDFs descargables */
+.doc-lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 11px;
+}
+
+.doc-lista a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 15px;
+    border: 1px solid var(--sc-line);
+    border-radius: 11px;
+    background: var(--sc-field);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color .15s, background .15s;
+}
+
+.doc-lista a:hover {
+    border-color: var(--sc-teal);
+    background: white;
+}
+
+.doc-icono {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    background: rgba(209, 73, 91, .12);
+    color: #d1495b;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: .3px;
+}
+
+.doc-nombre {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--sc-navy);
+    line-height: 1.3;
+}
+
+.doc-peso {
+    display: block;
+    margin-top: 2px;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--sc-muted);
+}
+
+.doc-vacio {
+    margin: 0;
+    padding: 22px;
+    border: 1px dashed var(--sc-field-line);
+    border-radius: 11px;
+    text-align: center;
+    font-size: 13.5px;
+    color: var(--sc-muted);
+}
+
+.doc-vacio code {
+    background: var(--sc-field);
+    border: 1px solid var(--sc-field-line);
+    border-radius: 5px;
+    padding: 1px 6px;
+    font-size: 12.5px;
+}
+
+@media (max-width: 860px) {
+    .repo-resumen {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    /* Con poco ancho, las columnas fijas comen la pantalla */
+    .repo-fija {
+        position: static;
+    }
+
+    .repo-larga,
+    .repo-fija-titulo {
+        min-width: 180px;
+        max-width: none;
+    }
+}

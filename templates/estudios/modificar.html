@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Modificar investigación — Repositorio Científico UTIP{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/repositorio.css') }}">
+{% endblock %}
+{% block content %}
+<section class="buscar-inv">
+    <header class="repo-head">
+        <div>
+            <h1>Modificar investigación cargada</h1>
+            <p>Escribí el título de la investigación para ver y editar sus datos.</p>
+        </div>
+        <a class="repo-volver" href="{{ url_for('estudios.inicio') }}">← Inicio</a>
+    </header>
+
+    <div class="inv-card">
+        <p class="ayuda">
+            Buscá por el título con el que se cargó (alcanza una parte). Si hay una
+            sola coincidencia se abre directo el formulario con todos los datos
+            guardados; al guardar se actualiza la base.
+        </p>
+
+        <form method="get" class="inv-buscar">
+            <input name="titulo" value="{{ titulo }}" autofocus autocomplete="off"
+                   placeholder="Título de la investigación...">
+            <button type="submit">Buscar</button>
+        </form>
+
+        {% if titulo and not resultados %}
+        <p class="inv-sin-resultados">
+            No hay ninguna investigación cargada cuyo título contenga
+            <b>{{ titulo }}</b>.
+        </p>
+        {% endif %}
+
+        {% if resultados %}
+        {# Solo se llega acá con más de una coincidencia: con una sola, la ruta
+           redirige directo al formulario de edición. #}
+        <ul class="inv-resultados">
+            {% for r in resultados %}
+            <li>
+                <a href="{{ url_for('estudios.editar', estudio_id=r['id']) }}">
+                    <span>
+                        <span class="inv-nombre">{{ r['titulo'] }}</span>
+                        <span class="inv-meta">
+                            {%- if r['tema'] %}{{ r['tema'] }} · {% endif -%}
+                            {%- if r['temporalidad'] %}{{ r['temporalidad'] }} · {% endif -%}
+                            cargada por {{ r['creado_por'] or '—' }}
+                            {%- if r['creado_en'] %} el {{ r['creado_en'] }}{% endif -%}
+                        </span>
+                    </span>
+                    <span class="inv-flecha">Modificar →</span>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
