@@ -1,0 +1,56 @@
+/* estudio.css — formulario de carga de investigaciones (apartados).
+   Complementa patients.css, de donde salen .card.ingreso, .fc-head, .stepper y
+   .wizard-nav. */
+
+/* Título del apartado dentro del paso */
+.apartado-titulo {
+    display: block;
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: .9px;
+    text-transform: uppercase;
+    color: var(--sc-cyan);
+    margin-bottom: 14px;
+}
+
+/* Las preguntas del formulario van a una sola columna: los enunciados son
+   largos y en dos columnas se leen mal. */
+.estudio-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+}
+
+.estudio-grid > label {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--sc-navy);
+    line-height: 1.4;
+    margin: 0;
+}
+
+.estudio-grid .col-span-full {
+    grid-column: 1 / -1;
+}
+
+/* Los textos de las opciones son largos: que el select no los recorte */
+.estudio-grid select {
+    text-overflow: ellipsis;
+}
+
+.estudio-grid textarea {
+    resize: vertical;
+    font-family: inherit;
+}
+
+/* Con un solo apartado el paso no necesita alto mínimo de wizard */
+.card.ingreso .wizard-step {
+    min-height: 0;
+}
+
+/* El indicador de apartados: con uno solo no aporta, pero queda listo para
+   cuando haya varios */
+.card.ingreso .stepper {
+    margin-top: 10px;
+}

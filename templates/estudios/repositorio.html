@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Repositorio — Repositorio Científico UTIP{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/repositorio.css') }}">
+{% endblock %}
+{% block content %}
+{% set puede_editar = current_user.rol in ('admin', 'editor') %}
+
+<section class="repo">
+    <header class="repo-head">
+        <div>
+            <h1>Repositorio de investigaciones</h1>
+            <p>Base de datos completa: cada fila es una investigación cargada.</p>
+        </div>
+        <a class="repo-volver" href="{{ url_for('estudios.inicio') }}">← Inicio</a>
+    </header>
+
+    <div class="repo-resumen">
+        <div class="tile">
+            <span class="tile-valor">{{ resumen.total }}</span>
+            <span class="tile-label">Investigaciones cargadas</span>
+        </div>
+        <div class="tile">
+            <span class="tile-valor">{{ resumen.completas }}</span>
+            <span class="tile-label">Con el apartado completo</span>
+        </div>
+        <div class="tile">
+            <span class="tile-valor">{{ resumen.incompletas }}</span>
+            <span class="tile-label">Con datos pendientes</span>
+        </div>
+        <div class="tile">
+            <span class="tile-valor">{{ resumen.autores }}</span>
+            <span class="tile-label">Personas que cargaron</span>
+        </div>
+    </div>
+
+    {% if not estudios %}
+    <p class="repo-vacio">
+        Todavía no hay investigaciones cargadas.
+        {% if puede_editar %}
+        <a href="{{ url_for('estudios.nueva') }}">Cargar la primera →</a>
+        {% endif %}
+    </p>
+    {% else %}
+
+    {# Filtro en vivo por texto: no vuelve al servidor, filtra las filas ya
+       renderizadas (ver repositorio.js). #}
+    <div class="repo-barra">
+        <input id="repo-filtro" type="search" autocomplete="off"
+               placeholder="Filtrar por cualquier dato (título, tema, temporalidad...)">
+        <span class="repo-conteo" id="repo-conteo">
+            {{ estudios | length }} de {{ estudios | length }}
+        </span>
+    </div>
+
+    <div class="repo-tabla-wrap">
+        <table class="repo-tabla" id="repo-tabla">
+            <thead>
+                {# Fila 1: apartados. Fila 2: preguntas. #}
+                <tr class="repo-grupos">
+                    {% for titulo_grupo, cols in grupos %}
+                    <th colspan="{{ cols | length }}">{{ titulo_grupo }}</th>
+                    {% endfor %}
+                    <th rowspan="2" class="repo-acciones-th">Acciones</th>
+                </tr>
+                <tr>
+                    {% for clave, etiqueta in columnas %}
+                    <th class="{% if clave in columnas_fijas %}repo-fija repo-fija-{{ clave }}{% endif %}
+                               {%- if clave in columnas_largas %} repo-larga{% endif %}">
+                        {{ etiqueta }}
+                    </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+            {% for est in estudios %}
+                <tr>
+                    {% for clave, etiqueta in columnas %}
+                    <td class="{% if clave in columnas_fijas %}repo-fija repo-fija-{{ clave }}{% endif %}
+                               {%- if clave in columnas_largas %} repo-larga{% endif %}">
+                        {{ est[clave] if est[clave] not in (None, '') else '—' }}
+                    </td>
+                    {% endfor %}
+                    <td class="repo-acciones">
+                        {% if puede_editar %}
+                        <a class="btn-editar"
+                           href="{{ url_for('estudios.editar', estudio_id=est['id']) }}">Modificar</a>
+                        {% endif %}
+                        {% if current_user.rol == 'admin' %}
+                        <form action="{{ url_for('estudios.borrar', estudio_id=est['id']) }}"
+                              method="post" class="repo-borrar"
+                              onsubmit="return confirm('¿Borrar DEFINITIVAMENTE la investigación &quot;{{ est['titulo'] }}&quot;?\n\nEsta acción NO se puede deshacer.');">
+                            <button type="submit">Borrar</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <p class="repo-nota">
+        La tabla scrollea en horizontal; el título queda fijo a la izquierda.
+    </p>
+    {% endif %}
+</section>
+{% endblock %}
+{% block extra_js %}
+{% if estudios %}
+<script src="{{ url_for('static', filename='js/repositorio.js') }}"></script>
+{% endif %}
+{% endblock %}

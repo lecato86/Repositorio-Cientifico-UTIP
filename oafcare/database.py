@@ -2,6 +2,8 @@ import sqlite3
 from flask import g, current_app
 from werkzeug.security import generate_password_hash
 
+from .utils.estudio import ESTUDIO_COLUMNAS
+
 try:
     import psycopg
     from psycopg.rows import dict_row
@@ -38,6 +40,16 @@ PACIENTE_COLUMNAS_INGRESO = [
     "hora_fin_oaf",
     "resultado_oaf",
 ]
+
+
+# La lista canónica de columnas de `estudios` (ESTUDIO_COLUMNAS) vive en
+# utils/estudio.py, junto a las opciones del formulario y los parsers. Acá se
+# usa para armar el CREATE TABLE y las migraciones, y así no queda duplicada.
+# Todas TEXT: admiten vacío y texto libre.
+
+def _estudios_columnas_sql() -> str:
+    """'titulo TEXT, tema TEXT, ...' para el CREATE TABLE de `estudios`."""
+    return ",\n                ".join(f"{col} TEXT" for col in ESTUDIO_COLUMNAS)
 
 
 # ---------------------------------------------------------------------------
@@ -267,6 +279,23 @@ def _init_postgres() -> None:
                 rol TEXT NOT NULL DEFAULT 'lector'
             )""")
 
+            # Investigaciones del repositorio científico. Independiente de las
+            # tablas de OAF: acá va lo que se carga por apartados desde
+            # "Cargar nueva investigación".
+            c.execute(f"""CREATE TABLE IF NOT EXISTS estudios (
+                id SERIAL PRIMARY KEY,
+                {_estudios_columnas_sql()},
+                creado_por TEXT,
+                creado_en TEXT,
+                actualizado_en TEXT
+            )""")
+
+            # Bases ya existentes: agregar los campos de apartados que falten.
+            for col in ESTUDIO_COLUMNAS:
+                c.execute(
+                    f"ALTER TABLE estudios ADD COLUMN IF NOT EXISTS {col} TEXT"
+                )
+
             c.execute(
                 "CREATE UNIQUE INDEX IF NOT EXISTS idx_pacientes_hc_trim "
                 "ON pacientes ((TRIM(hc)))"
@@ -357,7 +386,19 @@ def _init_sqlite() -> None:
         rol TEXT NOT NULL DEFAULT 'lector'
     )""")
 
+    # Investigaciones del repositorio científico (ver el equivalente Postgres).
+    c.execute(f"""CREATE TABLE IF NOT EXISTS estudios (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        {_estudios_columnas_sql()},
+        creado_por TEXT,
+        creado_en TEXT,
+        actualizado_en TEXT
+    )""")
+
     conn.commit()
+    # Bases ya existentes: agregar los campos de apartados que falten.
+    for col in ESTUDIO_COLUMNAS:
+        _add_column_if_missing(conn, "estudios", col, "TEXT")
     _recuperar_migracion_incompleta(conn)
     _add_column_if_missing(conn, "pacientes", "tq", "INTEGER DEFAULT 0")
     _migrate_edad_to_integer(conn)

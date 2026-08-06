@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ titulo_pagina }} — Repositorio Científico UTIP{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/patients.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/estudio.css') }}">
+{% endblock %}
+{% block content %}
+{% include "estudios/_apartados.html" %}
+<a class="volver" href="{{ url_for('estudios.inicio') }}">← Volver al inicio</a>
+{% endblock %}
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/ingreso_wizard.js') }}"></script>
+<script src="{{ url_for('static', filename='js/estudio_form.js') }}"></script>
+{% endblock %}

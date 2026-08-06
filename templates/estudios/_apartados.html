@@ -1,0 +1,90 @@
+{# Formulario de carga de una investigación, dividido en apartados.
+
+   Compartido por "cargar nueva" y "modificar": la única diferencia es el
+   `form_action` y los valores de `e`.
+
+   Variables de contexto:
+     form_action   URL de POST (obligatoria)
+     submit_label  texto del botón final
+     e             dict con los valores guardados ({} si es nueva)
+
+   Para agregar un apartado: sumá otra <section class="wizard-step"> y su <li>
+   en el .stepper. El JS toma la cantidad de pasos del DOM, no hay que tocarlo.
+#}
+{% set e = e if e is defined else {} %}
+
+<div class="card ingreso">
+    <div class="fc-head">
+        <h3>{{ titulo_pagina if titulo_pagina is defined else 'Cargar nueva investigación' }}</h3>
+        <ol class="stepper" aria-hidden="true">
+            <li class="is-current" data-dot="1">Sobre el estudio</li>
+        </ol>
+    </div>
+
+    <form class="form-body wizard" method="POST" action="{{ form_action }}" novalidate>
+
+        {# ---------- Apartado 1: sobre el estudio ---------- #}
+        <section class="wizard-step" data-step="1">
+            <span class="apartado-titulo">Sobre el estudio</span>
+
+            <div class="estudio-grid">
+                <label class="col-span-full">Título del estudio
+                    <input name="titulo" required
+                           placeholder="Título del estudio"
+                           value="{{ e.get('titulo', '') }}">
+                </label>
+
+                <label class="col-span-full">Tema a estudiar
+                    <input name="tema"
+                           placeholder="Tema a estudiar"
+                           value="{{ e.get('tema', '') }}">
+                </label>
+
+                <label class="col-span-full">¿De dónde se obtendrán los datos del estudio?
+                    {# El value de cada opción es el texto completo: es lo que se
+                       guarda en la base y lo que compara el JS para mostrar el
+                       campo de "otra fuente". #}
+                    <select name="fuente_datos" id="fuente-datos"
+                            data-otra="{{ FUENTE_DATOS_OTRA }}">
+                        <option value="">Elegí una opción...</option>
+                        {% for opcion in FUENTES_DATOS %}
+                        <option value="{{ opcion }}"
+                                {% if e.get('fuente_datos') == opcion %}selected{% endif %}>
+                            {{ opcion }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </label>
+
+                {# Solo aplica a la opción "De otras fuentes (especificar)".
+                   estudio_form.js lo muestra u oculta según el select; sin JS
+                   queda visible, que es el comportamiento seguro. #}
+                <label class="col-span-full" id="fuente-otra-campo">
+                    Especificá la otra fuente
+                    <textarea name="fuente_datos_otra" rows="2"
+                              placeholder="¿De qué otra fuente se obtendrán los datos?">{{ e.get('fuente_datos_otra', '') }}</textarea>
+                </label>
+
+                <label class="col-span-full">¿Cuál es la temporalidad del estudio?
+                    <select name="temporalidad">
+                        <option value="">Elegí una opción...</option>
+                        {% for opcion in TEMPORALIDADES %}
+                        <option value="{{ opcion }}"
+                                {% if e.get('temporalidad') == opcion %}selected{% endif %}>
+                            {{ opcion }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </div>
+        </section>
+
+        {# ---------- Navegación ---------- #}
+        <div class="wizard-nav">
+            <button type="button" class="btn-ghost" data-prev disabled>← Anterior</button>
+            <span class="wizard-progress">Apartado <b data-current>1</b> de <span data-total>1</span></span>
+            <button type="button" class="btn-next" data-next hidden>Siguiente →</button>
+            <button type="submit" class="btn-submit">{{ submit_label if submit_label is defined else 'Guardar investigación' }}</button>
+        </div>
+    </form>
+</div>

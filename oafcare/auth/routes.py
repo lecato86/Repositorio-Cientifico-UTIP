@@ -13,7 +13,7 @@ def login():
         usuario = authenticate(username, password)
         if usuario:
             login_user(usuario)
-            return redirect(url_for("patients.home"))
+            return redirect(url_for("estudios.inicio"))
         error = "Usuario o contraseña incorrectos."
     return render_template("auth/login.html", error=error)
 

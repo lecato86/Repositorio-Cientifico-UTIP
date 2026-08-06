@@ -1,0 +1,151 @@
+/* inicio.css — pantalla de inicio: menú de acciones del repositorio */
+
+.inicio {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 8px 0 40px;
+}
+
+.inicio-head {
+    text-align: center;
+    margin: 18px 0 30px;
+}
+
+.inicio-head h1 {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -.6px;
+    color: var(--sc-navy);
+}
+
+.inicio-head h1 span {
+    background: var(--sc-grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.inicio-head p {
+    margin: 8px 0 0;
+    color: var(--sc-muted);
+    font-size: 14.5px;
+}
+
+/* Grilla de opciones: 2 x 2 en escritorio, 1 columna en celular */
+.inicio-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.opcion {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    padding: 24px 24px 20px;
+    background: white;
+    border: 1px solid var(--sc-line);
+    border-radius: var(--sc-radius);
+    box-shadow: var(--sc-shadow-sm);
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    overflow: hidden;
+    transition: transform .15s, box-shadow .15s, border-color .15s;
+}
+
+/* Franja de acento arriba, que se pinta al pasar el mouse */
+.opcion::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 4px;
+    background: var(--sc-grad);
+    opacity: 0;
+    transition: opacity .15s;
+}
+
+.opcion:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--sc-shadow);
+    border-color: var(--sc-teal);
+}
+
+.opcion:hover::before {
+    opacity: 1;
+}
+
+.opcion-icono {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: rgba(34, 197, 94, .12);
+    color: var(--sc-blue);
+    margin-bottom: 2px;
+}
+
+.opcion-icono svg {
+    width: 24px;
+    height: 24px;
+}
+
+.opcion-titulo {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--sc-navy);
+    line-height: 1.25;
+}
+
+.opcion-texto {
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--sc-muted);
+    flex: 1;
+}
+
+.opcion-cta {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--sc-blue);
+    margin-top: 4px;
+}
+
+/* La opción "Cómo comenzar" se distingue como material de apoyo */
+.opcion-guia .opcion-icono {
+    background: rgba(20, 83, 45, .10);
+    color: var(--sc-navy);
+}
+
+/* Opción sin permisos: visible pero inerte */
+.opcion.is-bloqueada {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+.opcion.is-bloqueada:hover {
+    transform: none;
+    box-shadow: var(--sc-shadow-sm);
+    border-color: var(--sc-line);
+}
+
+.opcion.is-bloqueada:hover::before {
+    opacity: 0;
+}
+
+.opcion.is-bloqueada .opcion-cta {
+    color: var(--sc-muted);
+    font-weight: 600;
+}
+
+@media (max-width: 760px) {
+    .inicio-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .inicio-head h1 {
+        font-size: 26px;
+    }
+}

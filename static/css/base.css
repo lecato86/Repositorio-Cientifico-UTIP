@@ -131,6 +131,15 @@ body {
     stroke: #fff;
 }
 
+/* Separador entre el nav del repositorio y el de pacientes OAF (heredado) */
+.nav-sep {
+    width: 1px;
+    height: 22px;
+    margin: 0 6px;
+    background: var(--sc-line);
+    flex: none;
+}
+
 /* Logout keeps its warning color */
 .nav a.nav-logout {
     color: #d1495b;

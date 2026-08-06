@@ -81,12 +81,17 @@ def _legacy_preservados(paciente):
     }
 
 
-# ------------------ HOME ------------------
+# ------------------ NUEVO PACIENTE (OAF) ------------------
+# El seguimiento de pacientes OAF es funcionalidad heredada de OAFCare: queda
+# accesible, pero fuera del menú principal del repositorio (ver el blueprint
+# `estudios`, que es el que maneja las investigaciones).
 
-@patients_bp.route("/")
+@patients_bp.route("/pacientes/nuevo")
 @login_required
-def home():
-    return render_template("patients/home.html", edad_anios=0, edad_meses=0)
+@requiere_editor
+def nuevo_paciente():
+    """Wizard de ingreso de paciente OAF (POST a `guardar`)."""
+    return render_template("patients/nuevo.html", edad_anios=0, edad_meses=0)
 
 
 # ------------------ GUARDAR ------------------
@@ -157,7 +162,7 @@ def guardar():
     # Tabla de monitoreo (mediciones por tiempo) -> tabla mediciones_oaf.
     guardar_mediciones_oaf(hc, mediciones_desde_form(data))
 
-    return "<a href='/'>⬅ Volver</a> | <a href='/pacientes'>📋 Pacientes</a>"
+    return redirect(url_for("patients.listar_pacientes"))
 
 
 # ------------------ PACIENTES ------------------
