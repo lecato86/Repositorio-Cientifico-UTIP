@@ -82,7 +82,9 @@
                     </td>
                     {% endfor %}
                     <td class="repo-acciones">
-                        {% if puede_editar %}
+                        {# Solo quien cargó la investigación puede modificarla:
+                           en las ajenas no se ofrece el botón. #}
+                        {% if editables[est['id']] %}
                         <a class="btn-editar"
                            href="{{ url_for('estudios.editar', estudio_id=est['id']) }}">Modificar</a>
                         {% endif %}

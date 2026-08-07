@@ -39,21 +39,20 @@ def _normalizar_pg_url(url: str) -> str:
     return url
 
 
-def _parse_seed_users(raw: str):
-    """Parsea SEED_USERS a una lista de tuplas (usuario, password, rol).
+def _parse_admin_dnis(raw: str):
+    """Parsea ADMIN_DNIS a una lista de DNIs normalizados (solo dígitos).
 
-    Formato esperado:  usuario:password:rol,usuario2:password2:rol2
-    (los valores no pueden contener ':' ni ',').
+    Formato esperado:  30123456,28999111
+    Se aceptan puntos y espacios al escribirlos ('30.123.456'): se limpian acá
+    con la MISMA regla que usa el login, así el DNI del .env matchea con el que
+    la persona tipea.
     """
-    usuarios = []
+    dnis = []
     for item in (raw or "").split(","):
-        item = item.strip()
-        if not item:
-            continue
-        partes = [p.strip() for p in item.split(":")]
-        if len(partes) == 3 and all(partes):
-            usuarios.append(tuple(partes))
-    return usuarios
+        limpio = "".join(ch for ch in item if ch.isdigit())
+        if limpio and limpio not in dnis:
+            dnis.append(limpio)
+    return dnis
 
 
 def _parse_int(valor, default):
@@ -91,8 +90,12 @@ class Config:
     # en cada deploy/reinicio (ya pasó una vez — nunca más).
     EN_RENDER = bool(os.environ.get("RENDER"))
 
-    # Usuarios iniciales (solo se crean si la tabla de usuarios está vacía).
-    SEED_USUARIOS = _parse_seed_users(os.environ.get("SEED_USERS", ""))
+    # DNIs con rol de administrador. El acceso a la app NO tiene contraseña:
+    # se entra con nombre y apellido + DNI, y todo el que entra puede cargar y
+    # editar sus propias investigaciones. Los DNIs de esta lista, además,
+    # pueden borrar registros del repositorio.
+    # Vacía es válido: simplemente no hay administradores.
+    ADMIN_DNIS = _parse_admin_dnis(os.environ.get("ADMIN_DNIS", ""))
 
     # Servidor local (run_server.py / run_dev.py). En producción manda gunicorn.
     HOST = os.environ.get("HOST", "0.0.0.0")

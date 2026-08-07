@@ -3,91 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login — OAFCare</title>
+    <title>Ingresar — Repositorio Científico UTIP</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-image: url("{{ url_for('static', filename='fondo.jpg') }}");
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-        }
-
-        .login-card {
-            background: white;
-            padding: 40px 36px;
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
-            width: 100%;
-            max-width: 360px;
-            text-align: center;
-        }
-
-        .login-card img {
-            max-width: 160px;
-            margin-bottom: 24px;
-        }
-
-        .login-card input {
-            width: 100%;
-            padding: 10px 12px;
-            margin: 6px 0;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 15px;
-            box-sizing: border-box;
-        }
-
-        .login-card button {
-            width: 100%;
-            padding: 11px;
-            margin-top: 14px;
-            background: #22c55e;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .login-card button:hover {
-            background: #16a34a;
-        }
-
-        .error {
-            color: #ef4444;
-            margin-top: 10px;
-            font-size: 13px;
-        }
-
-        .firma {
-            position: fixed;
-            bottom: 12px;
-            right: 16px;
-            font-size: 11px;
-            color: #4b5563;
-            font-style: italic;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
 </head>
-<body>
+<body class="login-body">
 <div class="login-card">
-    <img src="{{ url_for('static', filename='logo.png') }}" alt="OAFCare"
-         onerror="this.style.display='none'">
-    <form method="POST">
-        <input name="username" placeholder="Usuario" required autofocus>
-        <input name="password" type="password" placeholder="Contraseña" required>
+    <img class="login-logo" src="{{ url_for('static', filename='logo.png') }}"
+         alt="Repositorio Científico UTIP" onerror="this.style.display='none'">
+
+    <h1 class="login-titulo">Repositorio Científico <span>UTIP</span></h1>
+    <p class="login-bajada">
+        Unidad de Terapia Intensiva Pediátrica.<br>
+        Identificate para entrar: no hace falta contraseña.
+    </p>
+
+    <form method="POST" class="login-form" autocomplete="off">
+        <label class="login-campo">
+            <span class="login-label">Nombre y apellido</span>
+            <input name="nombre" value="{{ nombre }}" required autofocus
+                   placeholder="Ej.: María Gómez" autocomplete="name">
+        </label>
+
+        <label class="login-campo">
+            <span class="login-label">DNI</span>
+            {# inputmode="numeric" abre el teclado numérico en el celular sin
+               bloquear los puntos si alguien los escribe: el servidor los limpia. #}
+            <input name="dni" value="{{ dni }}" required inputmode="numeric"
+                   placeholder="Ej.: 30123456">
+        </label>
+
         <button type="submit">Entrar</button>
-        {% if error %}<p class="error">{{ error }}</p>{% endif %}
+
+        {% if error %}<p class="login-error">{{ error }}</p>{% endif %}
     </form>
+
+    <p class="login-nota">
+        Tu DNI queda asociado a las investigaciones que cargues: solo vos vas a
+        poder modificarlas después.
+    </p>
 </div>
-<div class="firma">OAFCare · by Catriel Rossi</div>
+
+<div class="firma">Repositorio Científico UTIP · by Catriel Rossi</div>
 </body>
 </html>

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}No podés modificar esta investigación — Repositorio Científico UTIP{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/repositorio.css') }}">
+{% endblock %}
+{% block content %}
+<section class="buscar-inv">
+    <div class="inv-card bloqueo">
+        <div class="bloqueo-icono" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="4" y="10" width="16" height="10" rx="2"/>
+                <path d="M8 10V7a4 4 0 018 0v3" stroke-linecap="round"/>
+            </svg>
+        </div>
+
+        <h1 class="bloqueo-titulo">{{ mensaje }}</h1>
+
+        <p class="bloqueo-texto">
+            {% if estudio and estudio['creado_por'] %}
+            La investigación <b>«{{ estudio['titulo'] }}»</b> fue cargada por
+            <b>{{ estudio['creado_por'] }}</b>{% if estudio['creado_en'] %} el
+            {{ estudio['creado_en'] }}{% endif %}. Para editarla hay que ingresar
+            con ese mismo DNI.
+            {% else %}
+            Esta investigación no está a tu nombre, así que no se puede editar
+            desde tu usuario.
+            {% endif %}
+        </p>
+
+        <p class="bloqueo-texto">
+            Podés consultarla igual: en el repositorio se ve completa, con todos
+            sus datos.
+        </p>
+
+        <div class="bloqueo-acciones">
+            <a class="bloqueo-btn" href="{{ url_for('estudios.repositorio') }}">
+                Ver el repositorio
+            </a>
+            <a class="bloqueo-btn is-secundario" href="{{ url_for('estudios.modificar') }}">
+                Buscar otra investigación
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

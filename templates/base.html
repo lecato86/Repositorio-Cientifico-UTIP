@@ -25,22 +25,8 @@
         <a href="{{ url_for('estudios.como_comenzar') }}" {% if request.endpoint == 'estudios.como_comenzar' %}class="active"{% endif %}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5.5A2 2 0 016 4h5v16H6a2 2 0 01-2-1.5z" stroke-linejoin="round"/><path d="M20 5.5A2 2 0 0018 4h-5v16h5a2 2 0 002-1.5z" stroke-linejoin="round"/></svg>Cómo comenzar</a>
 
-        {# Seguimiento de pacientes OAF: heredado de OAFCare, fuera del flujo
-           principal del repositorio. Queda accesible detrás del separador. #}
-        <span class="nav-sep" aria-hidden="true"></span>
-        <a href="{{ url_for('patients.listar_pacientes') }}" {% if request.endpoint == 'patients.listar_pacientes' %}class="active"{% endif %}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h5" stroke-linecap="round"/></svg>Pacientes</a>
-        <a href="{{ url_for('charts.estadisticas') }}" {% if request.endpoint == 'charts.estadisticas' %}class="active"{% endif %}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 19V9M12 19V5M19 19v-7" stroke-linecap="round"/></svg>Estadísticas</a>
-        <a href="{{ url_for('charts.exportar') }}" {% if request.endpoint == 'charts.exportar' %}class="active"{% endif %}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v10m0 0l-4-4m4 4l4-4M5 20h14" stroke-linecap="round" stroke-linejoin="round"/></svg>Exportar CSV</a>
-        <a href="{{ url_for('charts.dashboard') }}" {% if request.endpoint == 'charts.dashboard' %}class="active"{% endif %}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4m6 16v-8m4 8V8" stroke-linecap="round"/></svg>Dashboard</a>
-        <a href="{{ url_for('patients.inactividad') }}" {% if request.endpoint == 'patients.inactividad' %}class="active"{% endif %}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4l9 16H3z" stroke-linejoin="round"/><path d="M12 10v4M12 17v.5" stroke-linecap="round"/></svg>Inactividad</a>
-        <a href="{{ url_for('patients.buscar') }}" {% if request.endpoint == 'patients.buscar' %}class="active"{% endif %}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4-4" stroke-linecap="round"/></svg>Buscar</a>
         {% if current_user.is_authenticated %}
+        <span class="nav-sep" aria-hidden="true"></span>
         <a class="nav-logout" href="{{ url_for('auth.logout') }}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2h6a2 2 0 002-2v-2M10 12h10m0 0l-3-3m3 3l-3 3" stroke-linecap="round" stroke-linejoin="round"/></svg>Salir</a>
         {% endif %}
@@ -52,7 +38,7 @@
 </main>
 
 <footer class="firma">
-    Repositorio Científico UTIP — {{ current_user.username if current_user.is_authenticated else '' }}
+    Repositorio Científico UTIP — {{ current_user.nombre if current_user.is_authenticated else '' }}
 </footer>
 
 {% block extra_js %}{% endblock %}
