@@ -131,7 +131,7 @@ body {
     stroke: #fff;
 }
 
-/* Separador entre el nav del repositorio y el de pacientes OAF (heredado) */
+/* Separador entre las secciones del nav y el botón de salir */
 .nav-sep {
     width: 1px;
     height: 22px;

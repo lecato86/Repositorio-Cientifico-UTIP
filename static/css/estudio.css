@@ -1,6 +1,89 @@
 /* estudio.css — formulario de carga de investigaciones (apartados).
-   Complementa patients.css, de donde salen .card.ingreso, .fc-head, .stepper y
-   .wizard-nav. */
+   Autocontenido: la tarjeta, el stepper y la barra de navegación salían de
+   patients.css, que se eliminó junto con el resto de OAFCare. */
+
+/* ============================================================
+   Tarjeta del formulario
+   ============================================================ */
+.card.ingreso {
+    max-width: 1040px;
+    margin: 20px auto;
+}
+
+.fc-head {
+    padding: 20px 26px;
+    border-bottom: 1px solid var(--sc-line);
+}
+
+.fc-head h3 {
+    margin: 0;
+    text-align: left;
+    color: var(--sc-navy);
+    font-size: 18px;
+}
+
+.form-body {
+    padding: 22px 26px 26px;
+}
+
+/* ============================================================
+   Indicador de apartados (stepper)
+   ============================================================ */
+.stepper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0;
+}
+
+.stepper li {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--sc-muted);
+}
+
+.stepper li::before {
+    content: attr(data-dot);
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    background: var(--sc-field);
+    border: 1px solid var(--sc-field-line);
+    font-size: 12px;
+}
+
+.stepper li.is-current {
+    color: var(--sc-navy);
+}
+
+.stepper li.is-current::before {
+    background: var(--sc-grad);
+    color: #fff;
+    border-color: transparent;
+}
+
+.stepper li.is-done::before {
+    content: "\2713";  /* ✓ */
+    background: var(--sc-teal);
+    color: #fff;
+    border-color: transparent;
+}
+
+/* ============================================================
+   Contenido de cada apartado
+   ============================================================ */
+/* Con un solo apartado el paso no necesita alto mínimo; cuando haya varios,
+   este valor evita que el salto entre páginas mueva la tarjeta. */
+.wizard-step {
+    min-height: 0;
+}
 
 /* Título del apartado dentro del paso */
 .apartado-titulo {
@@ -44,13 +127,67 @@
     font-family: inherit;
 }
 
-/* Con un solo apartado el paso no necesita alto mínimo de wizard */
-.card.ingreso .wizard-step {
-    min-height: 0;
+/* ============================================================
+   Navegación entre apartados
+   ============================================================ */
+.wizard-nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--sc-line);
 }
 
-/* El indicador de apartados: con uno solo no aporta, pero queda listo para
-   cuando haya varios */
-.card.ingreso .stepper {
-    margin-top: 10px;
+.wizard-progress {
+    margin-left: auto;
+    font-size: 13px;
+    color: var(--sc-muted);
+}
+
+.btn-ghost {
+    padding: 9px;
+    font-size: 12.5px;
+    font-weight: 600;
+    border-radius: 9px;
+    cursor: pointer;
+    background: var(--sc-field);
+    border: 1px solid var(--sc-field-line);
+    color: var(--sc-muted);
+    box-shadow: none;
+}
+
+.btn-ghost:hover {
+    border-color: var(--sc-cyan);
+    color: var(--sc-cyan);
+    filter: none;
+    transform: none;
+}
+
+.wizard-nav .btn-ghost {
+    flex: 0 0 auto;
+    width: auto;
+    padding: 10px 18px;
+}
+
+.wizard-nav .btn-next,
+.wizard-nav .btn-submit {
+    flex: 0 0 auto;
+    width: auto;
+    padding: 10px 24px;
+}
+
+/* Link "Volver al inicio" debajo de la tarjeta */
+.volver {
+    display: block;
+    text-align: center;
+    margin-top: 12px;
+    color: var(--sc-muted);
+    text-decoration: none;
+}
+
+@media (max-width: 760px) {
+    .wizard-nav {
+        flex-wrap: wrap;
+    }
 }

@@ -2,14 +2,6 @@ from flask import Flask
 from config import Config
 from .database import close_db, init_db
 from .auth.models import login_manager
-from .utils.soporte import SALAS, SOPORTES
-from .utils.muestras import MUESTRAS
-from .utils.edad import formato_edad
-from .utils.ingreso import (
-    SEXOS, SALAS_DERIVACION, ESTADOS_VIRUS, VIRUS_PANEL, COMORBILIDADES,
-    SOPORTES_PREVIOS, LUGARES_INICIO, COMPLICACIONES, RESULTADOS_OAF,
-    TIEMPOS_MEDICION, PARAMETROS_MEDICION,
-)
 from .utils.estudio import FUENTES_DATOS, FUENTE_DATOS_OTRA, TEMPORALIDADES
 
 
@@ -31,40 +23,17 @@ def create_app(config_class=Config):
     from .auth import auth_bp
     app.register_blueprint(auth_bp)
 
-    from .patients import patients_bp
-    app.register_blueprint(patients_bp)
-
-    from .charts import charts_bp
-    app.register_blueprint(charts_bp)
-
-    # Repositorio científico (investigaciones). Es el que sirve "/" y el menú
-    # principal; `patients` quedó con el seguimiento de pacientes OAF heredado.
+    # Repositorio científico (investigaciones): el único dominio de la app.
     from .estudios import estudios_bp
     app.register_blueprint(estudios_bp)
 
     @app.context_processor
     def inject_globals():
+        """Opciones fijas del formulario, disponibles en todas las plantillas."""
         return {
-            "SALAS": SALAS,
-            "SOPORTES": SOPORTES,
-            "MUESTRAS": MUESTRAS,
-            "SEXOS": SEXOS,
-            "SALAS_DERIVACION": SALAS_DERIVACION,
-            "ESTADOS_VIRUS": ESTADOS_VIRUS,
-            "VIRUS_PANEL": VIRUS_PANEL,
-            "COMORBILIDADES": COMORBILIDADES,
-            "SOPORTES_PREVIOS": SOPORTES_PREVIOS,
-            "LUGARES_INICIO": LUGARES_INICIO,
-            "COMPLICACIONES": COMPLICACIONES,
-            "RESULTADOS_OAF": RESULTADOS_OAF,
-            "TIEMPOS_MEDICION": TIEMPOS_MEDICION,
-            "PARAMETROS_MEDICION": PARAMETROS_MEDICION,
-            # Formulario de investigaciones
             "FUENTES_DATOS": FUENTES_DATOS,
             "FUENTE_DATOS_OTRA": FUENTE_DATOS_OTRA,
             "TEMPORALIDADES": TEMPORALIDADES,
         }
-
-    app.jinja_env.filters["formato_edad"] = formato_edad
 
     return app

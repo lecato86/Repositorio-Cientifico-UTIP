@@ -15,9 +15,9 @@
 
     <div class="inv-card">
         <p class="ayuda">
-            Buscá por el título con el que se cargó (alcanza una parte). Si hay una
-            sola coincidencia se abre directo el formulario con todos los datos
-            guardados; al guardar se actualiza la base.
+            Buscá por el título con el que se cargó (alcanza una parte). Solo
+            podés modificar las investigaciones que cargaste vos: se comparan
+            por DNI, así que entrá con el mismo con el que la subiste.
         </p>
 
         <form method="get" class="inv-buscar">
@@ -34,12 +34,19 @@
         {% endif %}
 
         {% if resultados %}
-        {# Solo se llega acá con más de una coincidencia: con una sola, la ruta
-           redirige directo al formulario de edición. #}
+        {# Se llega acá con más de una coincidencia, o con una sola que NO es
+           propia: con una sola propia, la ruta redirige directo al formulario.
+           Las ajenas se listan igual (para que se vea que existen) pero sin
+           link de edición. #}
         <ul class="inv-resultados">
             {% for r in resultados %}
+            {% set es_mia = editables[r['id']] %}
             <li>
+                {% if es_mia %}
                 <a href="{{ url_for('estudios.editar', estudio_id=r['id']) }}">
+                {% else %}
+                <div class="inv-ajena" title="{{ mensaje_ajeno }}">
+                {% endif %}
                     <span>
                         <span class="inv-nombre">{{ r['titulo'] }}</span>
                         <span class="inv-meta">
@@ -49,11 +56,22 @@
                             {%- if r['creado_en'] %} el {{ r['creado_en'] }}{% endif -%}
                         </span>
                     </span>
+                    {% if es_mia %}
                     <span class="inv-flecha">Modificar →</span>
-                </a>
+                    {% else %}
+                    <span class="inv-candado">No es tuya</span>
+                    {% endif %}
+                {% if es_mia %}</a>{% else %}</div>{% endif %}
             </li>
             {% endfor %}
         </ul>
+
+        {% if not editables.values() | select | list %}
+        <p class="inv-sin-resultados">
+            {{ mensaje_ajeno }} — ninguna de estas investigaciones se cargó con
+            tu DNI.
+        </p>
+        {% endif %}
         {% endif %}
     </div>
 </section>

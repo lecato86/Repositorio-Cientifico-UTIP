@@ -6,7 +6,7 @@ from flask_login import login_required, current_user
 from . import estudios_bp
 from .models import (
     crear_estudio, actualizar_estudio, get_estudio, get_todos_estudios,
-    buscar_estudios_por_titulo, borrar_estudio,
+    buscar_estudios_por_titulo, borrar_estudio, puede_modificar,
 )
 from oafcare.auth.decorators import requiere_editor, requiere_admin
 from oafcare.utils.estudio import estudio_desde_form
@@ -15,6 +15,20 @@ from oafcare.utils.repositorio import (
     resumen_repositorio,
 )
 from oafcare.utils.docs import documentos_disponibles
+
+
+# Mensaje único para cuando alguien intenta editar una investigación ajena.
+# Consultarla puede cualquiera; modificarla, solo quien la cargó.
+MSG_NO_ES_TU_ESTUDIO = "SOLO EL USUARIO QUE CARGÓ ESTE TRABAJO PUEDE MODIFICARLO"
+
+
+def _bloqueo_ajeno(estudio):
+    """Pantalla de "no es tuyo" para una investigación de otra persona."""
+    return render_template(
+        "estudios/no_autorizado.html",
+        estudio=estudio,
+        mensaje=MSG_NO_ES_TU_ESTUDIO,
+    ), 403
 
 
 # ------------------ INICIO (menú principal) ------------------
@@ -50,7 +64,7 @@ def guardar():
     if not datos["titulo"]:
         return "El título del estudio es obligatorio.", 400
 
-    crear_estudio(datos, current_user.username)
+    crear_estudio(datos, current_user.nombre, current_user.dni)
 
     return redirect(url_for("estudios.repositorio"))
 
@@ -66,6 +80,10 @@ def repositorio():
     """
     estudios = get_todos_estudios()
 
+    # El botón "Modificar" solo aparece en las filas propias: el resto se
+    # consultan pero no se editan.
+    editables = {e["id"]: puede_modificar(e, current_user) for e in estudios}
+
     return render_template(
         "estudios/repositorio.html",
         estudios=estudios,
@@ -74,6 +92,7 @@ def repositorio():
         columnas_fijas=COLUMNAS_FIJAS,
         columnas_largas=COLUMNAS_LARGAS,
         resumen=resumen_repositorio(estudios),
+        editables=editables,
     )
 
 
@@ -85,19 +104,32 @@ def repositorio():
 def modificar():
     """Busca una investigación por TÍTULO y abre el formulario con sus datos.
 
-    Con una sola coincidencia va derecho al formulario prellenado; con varias
-    muestra la lista para elegir cuál.
+    La búsqueda muestra TODAS las coincidencias, sean de quien sean: consultar
+    puede cualquiera. Lo que se marca en la lista es cuáles puede modificar
+    quien está usando la app (las que cargó con su mismo DNI).
+
+    Con una sola coincidencia propia va derecho al formulario prellenado; si es
+    ajena o hay varias, se muestra la lista.
     """
     titulo = request.args.get("titulo", "").strip()
     resultados = buscar_estudios_por_titulo(titulo) if titulo else []
 
-    if len(resultados) == 1:
+    # El template necesita saber, por cada resultado, si es editable.
+    editables = {
+        r["id"]: puede_modificar(r, current_user) for r in resultados
+    }
+
+    if len(resultados) == 1 and editables[resultados[0]["id"]]:
         return redirect(
             url_for("estudios.editar", estudio_id=resultados[0]["id"])
         )
 
     return render_template(
-        "estudios/modificar.html", titulo=titulo, resultados=resultados
+        "estudios/modificar.html",
+        titulo=titulo,
+        resultados=resultados,
+        editables=editables,
+        mensaje_ajeno=MSG_NO_ES_TU_ESTUDIO,
     )
 
 
@@ -105,10 +137,17 @@ def modificar():
 @login_required
 @requiere_editor
 def editar(estudio_id):
-    """Formulario prellenado con todo lo guardado de una investigación."""
+    """Formulario prellenado con todo lo guardado de una investigación.
+
+    Solo lo abre quien la cargó: se compara el DNI del autor con el del usuario
+    en sesión.
+    """
     estudio = get_estudio(estudio_id)
     if not estudio:
         return redirect(url_for("estudios.modificar"))
+
+    if not puede_modificar(estudio, current_user):
+        return _bloqueo_ajeno(estudio)
 
     # A dict para poder usar e.get(...) en el template (sqlite3.Row no tiene get).
     e = {k: estudio[k] for k in estudio.keys()}
@@ -126,8 +165,14 @@ def editar(estudio_id):
 @login_required
 @requiere_editor
 def actualizar(estudio_id):
-    if not get_estudio(estudio_id):
+    estudio = get_estudio(estudio_id)
+    if not estudio:
         return redirect(url_for("estudios.modificar"))
+
+    # Se vuelve a chequear acá y no solo en `editar`: el POST es una URL más y
+    # podría llegar sin haber pasado por el formulario.
+    if not puede_modificar(estudio, current_user):
+        return _bloqueo_ajeno(estudio)
 
     datos = estudio_desde_form(request.form)
     if not datos["titulo"]:

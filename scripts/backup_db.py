@@ -1,25 +1,25 @@
-"""Backup y restore de la base de datos de OAFCare.
+"""Backup y restore de la base del Repositorio Científico UTIP.
 
-Hace un dump completo de todas las tablas a un archivo JSON con timestamp
-(para restaurar) y además exporta la base a CSV (una planilla por tabla,
-para abrir en Excel), o restaura uno de esos JSON. Funciona contra el motor
+Hace un dump completo de la tabla `estudios` (la única de la app) a un archivo
+JSON con timestamp (para restaurar) y además la exporta a CSV (para abrir en
+Excel), o restaura uno de esos JSON. Funciona contra el motor
 que esté configurado en .env: Postgres si hay DATABASE_URL (producción /
 Neon), SQLite si no (desarrollo local).
 
 Uso:
     # Crear un backup. Genera:
-    #   backups/oafcare_backup_AAAAMMDD_HHMMSS.json       (para restaurar)
-    #   backups/oafcare_backup_AAAAMMDD_HHMMSS_csv/*.csv  (para Excel)
+    #   backups/utip_backup_AAAAMMDD_HHMMSS.json       (para restaurar)
+    #   backups/utip_backup_AAAAMMDD_HHMMSS_csv/*.csv  (para Excel)
     python scripts/backup_db.py
 
     # Restaurar un backup (solo si las tablas destino están vacías)
-    python scripts/backup_db.py --restore backups/oafcare_backup_20260706_150000.json
+    python scripts/backup_db.py --restore backups/utip_backup_20260706_150000.json
 
     # Restaurar PISANDO los datos existentes (borra las tablas primero)
     python scripts/backup_db.py --restore <archivo> --force
 
-Los backups contienen datos de pacientes: NUNCA se commitean (backups/
-está en .gitignore).
+Los backups contienen las investigaciones cargadas y el DNI de quien las
+cargó: NUNCA se commitean (backups/ está en .gitignore).
 """
 import argparse
 import csv
@@ -32,8 +32,11 @@ from datetime import datetime
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config import Config, BASE_DIR
+from oafcare.database import ESTUDIO_COLUMNAS_META
+from oafcare.utils.estudio import ESTUDIO_COLUMNAS
 
-TABLAS = ["pacientes", "atenciones_diarias", "historial", "usuarios"]
+# La app tiene una sola tabla. Si en el futuro hay más, se agregan acá.
+TABLAS = ["estudios"]
 BACKUP_DIR = os.path.join(BASE_DIR, "backups")
 
 
@@ -63,11 +66,7 @@ def _conectar():
 # Columnas conocidas de cada tabla. Se usan para exportar a CSV con
 # encabezados aunque la tabla esté vacía (así el archivo siempre es legible).
 COLUMNAS = {
-    "pacientes": ["hc", "nombre", "edad", "diagnostico", "soporte", "sala",
-                  "ultima_actualizacion", "estado", "fecha_alta", "muestra", "tq"],
-    "atenciones_diarias": ["id", "hc", "fecha", "atenciones"],
-    "historial": ["id", "hc", "campo", "valor_anterior", "valor_nuevo", "fecha"],
-    "usuarios": ["id", "username", "password_hash", "rol"],
+    "estudios": ["id"] + list(ESTUDIO_COLUMNAS) + list(ESTUDIO_COLUMNAS_META),
 }
 
 
@@ -97,7 +96,7 @@ def hacer_backup() -> None:
 
         ahora = datetime.now()
         backup = {
-            "app": "oafcare",
+            "app": "repositorio-utip",
             "motor": motor,
             "fecha": ahora.isoformat(timespec="seconds"),
             "tablas": datos,
@@ -107,13 +106,13 @@ def hacer_backup() -> None:
 
     os.makedirs(BACKUP_DIR, exist_ok=True)
     stamp = ahora.strftime("%Y%m%d_%H%M%S")
-    ruta = os.path.join(BACKUP_DIR, f"oafcare_backup_{stamp}.json")
+    ruta = os.path.join(BACKUP_DIR, f"utip_backup_{stamp}.json")
     with open(ruta, "w", encoding="utf-8") as f:
         json.dump(backup, f, ensure_ascii=False, indent=1)
 
     # Además del JSON (que sirve para restaurar), exportamos la base a CSV
     # (una planilla por tabla) para poder abrirla y leerla en Excel.
-    carpeta_csv = os.path.join(BACKUP_DIR, f"oafcare_backup_{stamp}_csv")
+    carpeta_csv = os.path.join(BACKUP_DIR, f"utip_backup_{stamp}_csv")
     _exportar_csv(datos, carpeta_csv)
 
     print(f"Backup creado: {ruta}  (motor: {motor})")
@@ -125,8 +124,8 @@ def hacer_backup() -> None:
 def restaurar(ruta: str, force: bool) -> None:
     with open(ruta, encoding="utf-8") as f:
         backup = json.load(f)
-    if backup.get("app") != "oafcare" or "tablas" not in backup:
-        raise SystemExit(f"El archivo no parece un backup de OAFCare: {ruta}")
+    if backup.get("app") != "repositorio-utip" or "tablas" not in backup:
+        raise SystemExit(f"El archivo no parece un backup del repositorio: {ruta}")
 
     conn, motor = _conectar()
     ph = "%s" if motor == "postgres" else "?"
@@ -157,7 +156,7 @@ def restaurar(ruta: str, force: bool) -> None:
 
         # En Postgres, alinear las secuencias SERIAL con los ids insertados.
         if motor == "postgres":
-            for tabla in ("atenciones_diarias", "historial", "usuarios"):
+            for tabla in TABLAS:
                 conn.execute(
                     f"SELECT setval(pg_get_serial_sequence('{tabla}', 'id'), "
                     f"COALESCE((SELECT MAX(id) FROM {tabla}), 1))"
