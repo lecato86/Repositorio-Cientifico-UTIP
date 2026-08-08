@@ -18,6 +18,8 @@
         <h3>{{ titulo_pagina if titulo_pagina is defined else 'Cargar nueva investigación' }}</h3>
         <ol class="stepper" aria-hidden="true">
             <li class="is-current" data-dot="1">Sobre el estudio</li>
+            <li data-dot="2">Investigadores</li>
+            <li data-dot="3">Estado</li>
         </ol>
     </div>
 
@@ -44,8 +46,7 @@
                     {# El value de cada opción es el texto completo: es lo que se
                        guarda en la base y lo que compara el JS para mostrar el
                        campo de "otra fuente". #}
-                    <select name="fuente_datos" id="fuente-datos"
-                            data-otra="{{ FUENTE_DATOS_OTRA }}">
+                    <select name="fuente_datos" id="fuente-datos">
                         <option value="">Elegí una opción...</option>
                         {% for opcion in FUENTES_DATOS %}
                         <option value="{{ opcion }}"
@@ -59,7 +60,9 @@
                 {# Solo aplica a la opción "De otras fuentes (especificar)".
                    estudio_form.js lo muestra u oculta según el select; sin JS
                    queda visible, que es el comportamiento seguro. #}
-                <label class="col-span-full" id="fuente-otra-campo">
+                <label class="col-span-full"
+                       data-depende-de="fuente-datos"
+                       data-mostrar-si="{{ FUENTE_DATOS_OTRA }}">
                     Especificá la otra fuente
                     <textarea name="fuente_datos_otra" rows="2"
                               placeholder="¿De qué otra fuente se obtendrán los datos?">{{ e.get('fuente_datos_otra', '') }}</textarea>
@@ -71,6 +74,87 @@
                         {% for opcion in TEMPORALIDADES %}
                         <option value="{{ opcion }}"
                                 {% if e.get('temporalidad') == opcion %}selected{% endif %}>
+                            {{ opcion }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </div>
+        </section>
+
+        {# ---------- Apartado 2: investigadores ---------- #}
+        <section class="wizard-step" data-step="2" hidden>
+            <span class="apartado-titulo">Investigadores</span>
+
+            <div class="estudio-grid">
+                <label class="col-span-full">¿Quién es el director de la investigación?
+                    <input name="director"
+                           placeholder="Nombre y apellido del director"
+                           value="{{ e.get('director', '') }}">
+                </label>
+
+                <label class="col-span-full">¿Quiénes son los/las investigadores?
+                    <textarea name="investigadores" rows="3"
+                              placeholder="Nombre y apellido de cada integrante, separados por coma">{{ e.get('investigadores', '') }}</textarea>
+                </label>
+
+                {# Contacto: obligatorio. Un registro sin forma de llegar al
+                   equipo no sirve. Son campos cortos, así que van uno al lado
+                   del otro (sin col-span-full); en celular la grilla los apila. #}
+                <label>Teléfono de contacto
+                    <input name="telefono_contacto" type="tel" required
+                           placeholder="Ej.: 11 5555-4444"
+                           value="{{ e.get('telefono_contacto', '') }}">
+                </label>
+
+                <label>Mail de contacto
+                    {# type="email" hace que el navegador avise si el formato
+                       está mal y abre el teclado correcto en el celular. #}
+                    <input name="email_contacto" type="email" required
+                           placeholder="Ej.: investigacion@utip.gob.ar"
+                           value="{{ e.get('email_contacto', '') }}">
+                </label>
+
+                <label class="col-span-full">¿Participan investigadores de otras instituciones?
+                    <select name="otras_instituciones" id="otras-instituciones">
+                        <option value="">Elegí una opción...</option>
+                        {% for opcion in OTRAS_INSTITUCIONES %}
+                        <option value="{{ opcion }}"
+                                {% if e.get('otras_instituciones') == opcion %}selected{% endif %}>
+                            {{ opcion }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </label>
+
+                {# Solo aplica si la respuesta es "Sí" (ver estudio_form.js).
+                   Sin JS queda visible, que es el comportamiento seguro. #}
+                <label class="col-span-full"
+                       data-depende-de="otras-instituciones"
+                       data-mostrar-si="{{ OTRAS_INSTITUCIONES_SI }}">
+                    ¿Qué instituciones?
+                    <textarea name="instituciones_detalle" rows="2"
+                              placeholder="Nombre de cada institución participante">{{ e.get('instituciones_detalle', '') }}</textarea>
+                </label>
+
+            </div>
+        </section>
+
+        {# ---------- Apartado 3: estado de la investigación ----------
+           Va aparte y al final: no describe al estudio ni a quienes lo hacen,
+           es en qué punto está HOY y cambia a lo largo del tiempo. Acá van los
+           datos de seguimiento que se sumen (fecha de aprobación, revista,
+           publicación). #}
+        <section class="wizard-step" data-step="3" hidden>
+            <span class="apartado-titulo">Estado de la investigación</span>
+
+            <div class="estudio-grid">
+                <label class="col-span-full">¿En qué estado se encuentra actualmente la investigación?
+                    <select name="estado_actual">
+                        <option value="">Elegí una opción...</option>
+                        {% for opcion in ESTADOS_INVESTIGACION %}
+                        <option value="{{ opcion }}"
+                                {% if e.get('estado_actual') == opcion %}selected{% endif %}>
                             {{ opcion }}
                         </option>
                         {% endfor %}

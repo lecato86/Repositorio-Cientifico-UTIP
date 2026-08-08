@@ -1,23 +1,31 @@
-// estudio_form.js — reglas de visibilidad del formulario de investigaciones.
+// estudio_form.js — campos que solo aplican a una respuesta puntual.
 //
-// "¿De dónde se obtendrán los datos?" tiene una opción que pide especificar.
-// El campo de texto vive siempre en el HTML (sin JS queda visible, que es lo
-// seguro) y acá se oculta salvo cuando esa opción está elegida.
+// Hay preguntas cuyo campo de detalle solo tiene sentido con cierta opción
+// elegida ("De otras fuentes (especificar)", "¿Otras instituciones? Sí").
+// Esos campos viven SIEMPRE en el HTML —sin JS quedan visibles, que es el
+// comportamiento seguro— y acá se ocultan salvo cuando corresponde.
+//
+// Para sumar otro no hay que tocar este archivo: alcanza con marcar el campo
+// en el template con
+//     data-depende-de="<id del select>" data-mostrar-si="<texto de la opción>"
 (function () {
     "use strict";
 
-    const select = document.getElementById("fuente-datos");
-    const campo = document.getElementById("fuente-otra-campo");
-    if (!select || !campo) return;
+    const condicionales = document.querySelectorAll("[data-depende-de]");
 
-    // El texto exacto de la opción que habilita el campo lo pone el template
-    // desde FUENTE_DATOS_OTRA, para no repetirlo acá.
-    const valorOtra = select.dataset.otra;
+    condicionales.forEach((campo) => {
+        const select = document.getElementById(campo.dataset.dependeDe);
+        if (!select) return;
 
-    function sincronizar() {
-        campo.hidden = select.value !== valorOtra;
-    }
+        // El texto exacto de la opción lo pone el template desde la constante
+        // de Python, para no repetirlo acá y que no se desincronicen.
+        const valorQueMuestra = campo.dataset.mostrarSi;
 
-    select.addEventListener("change", sincronizar);
-    sincronizar();
+        function sincronizar() {
+            campo.hidden = select.value !== valorQueMuestra;
+        }
+
+        select.addEventListener("change", sincronizar);
+        sincronizar();
+    });
 })();
