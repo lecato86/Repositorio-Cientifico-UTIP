@@ -59,7 +59,7 @@
 }
 
 .login-titulo span {
-    background: var(--sc-grad);
+    background: var(--sc-grad-fuerte);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -109,13 +109,13 @@
 .login-form input:focus {
     outline: none;
     border-color: var(--sc-cyan);
-    box-shadow: 0 0 0 3px rgba(34, 197, 94, .15);
+    box-shadow: 0 0 0 3px rgba(var(--sc-acento-rgb), .15);
 }
 
 .login-form button {
     margin-top: 6px;
     padding: 12px;
-    background: var(--sc-grad);
+    background: var(--sc-grad-fuerte);
     color: white;
     border: none;
     border-radius: 10px;

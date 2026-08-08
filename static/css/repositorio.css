@@ -309,8 +309,8 @@
 }
 
 .est-estado--sin-dato {
-    background: #f1f5f9;
-    color: #64748b;
+    background: var(--sc-line);
+    color: var(--sc-muted);
 }
 
 .repo-sin-coincidencias {
@@ -368,7 +368,7 @@
     margin-top: 16px;
     padding: 9px 16px;
     border-radius: 9px;
-    background: var(--sc-grad);
+    background: var(--sc-grad-fuerte);
     color: white;
     font-size: 13px;
     font-weight: 700;
@@ -427,7 +427,7 @@
 }
 
 .ficha-campos .is-vacio dd {
-    color: #94a3b8;
+    color: #89969A;
     font-style: italic;
     font-size: 13.5px;
 }
@@ -494,7 +494,7 @@
     height: var(--alto-grupos);
     padding-top: 0;
     padding-bottom: 0;
-    background: #0d3d20;
+    background: var(--sc-navy);
     font-size: 11px;
     letter-spacing: .5px;
     text-transform: uppercase;
@@ -512,7 +512,7 @@
 }
 
 .repo-tabla tbody tr:hover td {
-    background: #f0fdf4;
+    background: var(--sc-field);
 }
 
 /* Columnas con texto largo (enunciados, opciones completas): en vez de estirar
@@ -540,7 +540,7 @@
     border-right: 1px solid var(--sc-line);
     /* Sombra al borde derecho: deja ver que el resto de la tabla pasa por
        debajo, en vez de parecer que los textos se pisan. */
-    box-shadow: 6px 0 8px -6px rgba(20, 83, 45, .22);
+    box-shadow: 6px 0 8px -6px rgba(var(--sc-tinta-rgb), .22);
 }
 
 .repo-link-detalle {
@@ -560,7 +560,7 @@
 }
 
 .repo-tabla tbody tr:hover .repo-fija {
-    background: #f0fdf4;
+    background: var(--sc-field);
 }
 
 /* Acciones por fila */
@@ -693,7 +693,7 @@
 /* Investigación cargada por otra persona: se lista para que se sepa que
    existe, pero sin link — solo su autor puede modificarla. */
 .inv-resultados li .inv-ajena {
-    background: #fafafa;
+    background: #FAFBFB;
     border-style: dashed;
     cursor: not-allowed;
 }
@@ -748,7 +748,7 @@
    junto con el resto de OAFCare. */
 .btn-editar {
     display: inline-block;
-    background: var(--sc-grad);
+    background: var(--sc-grad-fuerte);
     color: white;
     padding: 7px 10px;
     border-radius: 8px;
@@ -810,7 +810,7 @@
 .bloqueo-btn {
     padding: 10px 18px;
     border-radius: 10px;
-    background: var(--sc-grad);
+    background: var(--sc-grad-fuerte);
     color: white;
     font-size: 13.5px;
     font-weight: 700;
@@ -875,7 +875,7 @@
     width: 30px;
     height: 30px;
     border-radius: 999px;
-    background: var(--sc-grad);
+    background: var(--sc-grad-fuerte);
     color: white;
     font-weight: 800;
     font-size: 13.5px;
@@ -1030,7 +1030,7 @@
     width: 40px;
     height: 40px;
     border-radius: 10px;
-    background: var(--sc-grad);
+    background: var(--sc-grad-fuerte);
     color: white;
 }
 

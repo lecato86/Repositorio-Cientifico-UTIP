@@ -64,7 +64,7 @@
 }
 
 .stepper li.is-current::before {
-    background: var(--sc-grad);
+    background: var(--sc-grad-fuerte);
     color: #fff;
     border-color: transparent;
 }
