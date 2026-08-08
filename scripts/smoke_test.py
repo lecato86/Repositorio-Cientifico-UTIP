@@ -398,16 +398,18 @@ try:
         _c.close()
         check("solo queda la tabla estudios", tablas == ["estudios"], str(tablas))
 
-        # --- enlace al sitio del Comite en "Como comenzar" ---
-        print("\nComo comenzar: enlace al Comite:")
+        # --- enlace a la Comision de Investigacion en "Como comenzar" ---
+        print("\nComo comenzar: enlace a la Comision:")
         html = c.get("/como-comenzar").get_data(as_text=True)
-        check("el enlace apunta al sitio del Comite",
+        check("el enlace apunta al sitio de la Comision",
               "sites.google.com/fcm.unc.edu.ar/hnst" in html)
         check("se abre en otra pestana, sin filtrar el referrer",
               'target="_blank" rel="noopener noreferrer"' in html)
         check("NO se muestra la direccion, sino el nombre",
-              "Ir al sitio del Comité" in html
+              "Ir al sitio de la Comisión de Investigación" in html
               and "https://sites.google.com" not in html.split("href=")[1])
+        check("es solo el link, sin texto introductorio",
+              "Antes de empezar conviene" not in html)
 
         # --- reglas CSS de las que depende el comportamiento ---
         # No se puede renderizar sin navegador, pero estas tres ya fallaron una
