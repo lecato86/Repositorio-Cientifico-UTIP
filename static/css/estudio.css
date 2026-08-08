@@ -115,6 +115,16 @@
     margin: 0;
 }
 
+/* Los campos condicionales se ocultan con el atributo `hidden` desde
+   estudio_form.js. La regla del navegador es `[hidden] { display: none }`, que
+   por especificidad PIERDE contra el `display: block` de arriba: sin esto, el
+   campo se mostraba siempre y las preguntas que no aplicaban quedaban a la
+   vista confundiendo (ej: "Especificá la otra fuente" sin haber elegido
+   "otras fuentes"). */
+.estudio-grid > label[hidden] {
+    display: none;
+}
+
 .estudio-grid .col-span-full {
     grid-column: 1 / -1;
 }

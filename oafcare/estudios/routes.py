@@ -12,7 +12,7 @@ from oafcare.auth.decorators import requiere_editor, requiere_admin
 from oafcare.utils.estudio import estudio_desde_form, faltantes
 from oafcare.utils.repositorio import (
     GRUPOS_REPOSITORIO, COLUMNAS_REPOSITORIO, COLUMNAS_FIJAS, COLUMNAS_LARGAS,
-    resumen_repositorio,
+    resumen_repositorio, etapa_de,
 )
 from oafcare.utils.docs import documentos_disponibles
 
@@ -93,25 +93,55 @@ def guardar():
 @estudios_bp.route("/repositorio")
 @login_required
 def repositorio():
-    """Visualización completa de la base de investigaciones.
+    """Las investigaciones cargadas, en tarjetas (por defecto) o en tabla.
+
+    `?vista=tabla` muestra la planilla completa, con todas las columnas. Sin
+    ese parámetro se ven las tarjetas: la tabla tiene 15 columnas y para
+    leerla hay que scrollear en horizontal, así que sirve para comparar pero
+    no para mirar el repositorio.
 
     Las columnas y su agrupación se declaran en `utils/repositorio.py`.
     """
     estudios = get_todos_estudios()
+    vista = "tabla" if request.args.get("vista") == "tabla" else "tarjetas"
 
-    # El botón "Modificar" solo aparece en las filas propias: el resto se
-    # consultan pero no se editan.
+    # El botón "Modificar" solo aparece en las propias: el resto se consultan
+    # pero no se editan.
     editables = {e["id"]: puede_modificar(e, current_user) for e in estudios}
+    etapas = {e["id"]: etapa_de(e["estado_actual"]) for e in estudios}
 
     return render_template(
         "estudios/repositorio.html",
         estudios=estudios,
+        vista=vista,
         grupos=GRUPOS_REPOSITORIO,
         columnas=COLUMNAS_REPOSITORIO,
         columnas_fijas=COLUMNAS_FIJAS,
         columnas_largas=COLUMNAS_LARGAS,
         resumen=resumen_repositorio(estudios),
         editables=editables,
+        etapas=etapas,
+    )
+
+
+@estudios_bp.route("/estudios/<int:estudio_id>")
+@login_required
+def detalle(estudio_id):
+    """Ficha de una investigación: todos sus datos, agrupados por apartado.
+
+    Es la pantalla a la que se entra desde una tarjeta del repositorio. La
+    puede ver cualquiera; el botón de modificar solo aparece para su autor.
+    """
+    estudio = get_estudio(estudio_id)
+    if not estudio:
+        return redirect(url_for("estudios.repositorio"))
+
+    return render_template(
+        "estudios/detalle.html",
+        e=estudio,
+        grupos=GRUPOS_REPOSITORIO,
+        etapa=etapa_de(estudio["estado_actual"]),
+        puede_editar=puede_modificar(estudio, current_user),
     )
 
 

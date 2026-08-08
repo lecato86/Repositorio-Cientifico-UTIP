@@ -27,7 +27,8 @@ oafcare/
   auth/                 # Blueprint: /login, /logout. Sin contraseña ni tabla
   estudios/             # Blueprint ÚNICO: el repositorio de investigaciones
     models.py           # SQL de la tabla `estudios` + puede_modificar()
-    routes.py           # /, /nueva-investigacion, /repositorio, /modificar, /como-comenzar
+    routes.py           # /, /nueva-investigacion, /repositorio, /estudios/<id>,
+                        # /modificar, /como-comenzar
   utils/
     estudio.py          # Formulario: opciones, ESTUDIO_COLUMNAS, parsers
     repositorio.py      # Columnas y agrupación de la vista "Consultar repositorio"
@@ -38,8 +39,8 @@ scripts/
 templates/
   base.html             # Layout + navbar
   auth/login.html       # Ingreso: nombre y apellido + DNI
-  estudios/             # inicio, nueva, _apartados, repositorio, modificar,
-                        # como_comenzar, no_autorizado
+  estudios/             # inicio, nueva, _apartados, repositorio, detalle,
+                        # modificar, como_comenzar, no_autorizado
 static/
   css/                  # base.css, login.css, inicio.css, estudio.css, repositorio.css
   js/                   # ingreso_wizard.js, estudio_form.js, repositorio.js
@@ -87,7 +88,7 @@ static/
 ### Pantalla de inicio (estudios/inicio.html)
 - `/` (`estudios.inicio`) es un **menú de cuatro opciones**. Cada opción es una tarjeta de `.inicio-grid` (estilos en `static/css/inicio.css`):
   1. **Cargar nueva investigación** → `estudios.nueva` (`/nueva-investigacion`): el formulario por apartados, POST a `estudios.guardar` (misma URL).
-  2. **Consultar repositorio** → `estudios.repositorio` (`/repositorio`): la base completa en una tabla.
+  2. **Consultar repositorio** → `estudios.repositorio` (`/repositorio`): las investigaciones en tarjetas, o en tabla con `?vista=tabla`. Cada una abre su ficha en `estudios.detalle`.
   3. **Modificar investigación cargada** → `estudios.modificar` (`/modificar`): búsqueda por título.
   4. **Cómo comenzar** → `estudios.como_comenzar` (`/como-comenzar`): guía + PDFs.
 - Las opciones 1 y 3 escriben en la base: llevan `@requiere_editor` y en el menú se muestran deshabilitadas (`.opcion.is-bloqueada`) para quien no pueda editar, en vez de ocultarse. Si agregás una opción que escribe, replicá las dos cosas (decorador **y** estado bloqueado).
@@ -117,12 +118,30 @@ static/
 - `actualizar_estudio` escribe **todas** las columnas del formulario (sin `COALESCE`): el form manda siempre el conjunto completo y un campo borrado a propósito tiene que quedar vacío.
 
 ### Consultar repositorio (estudios/repositorio.html)
-- Vista completa de la tabla `estudios`: una fila por investigación, todas las columnas, la más reciente primero.
-- **Qué columnas se muestran y cómo se agrupan está en `utils/repositorio.py`**, en `GRUPOS_REPOSITORIO` (lista de `(título del grupo, [(clave, etiqueta), ...])`). El encabezado tiene dos filas: los apartados y las preguntas. Al sumar un campo, agregalo también acá o no aparece.
+Hay **dos vistas de lo mismo**, en la misma ruta:
+- **Tarjetas (por defecto)** — una tarjeta por investigación con lo esencial (estado, título, tema, director, temporalidad, si es multicéntrico) y el pie con autor y acciones. Se toca y se abre la ficha. Es la vista para mirar el repositorio.
+- **Tabla (`?vista=tabla`)** — la planilla completa, todas las columnas, para comparar. El título linkea a la ficha.
+
+- **Qué columnas se muestran y cómo se agrupan está en `utils/repositorio.py`**, en `GRUPOS_REPOSITORIO` (lista de `(título del grupo, [(clave, etiqueta), ...])`). Lo usan la tabla **y** la ficha, así que al sumar un campo aparece en las dos sin tocar templates. En la tabla el encabezado tiene dos filas: los apartados y las preguntas.
 - Las claves tienen que existir en la fila: una clave inexistente hace fallar el template (`sqlite3.Row` levanta `IndexError`). `COLUMNAS_FIJAS` quedan pegadas a la izquierda al scrollear (`position: sticky`, desactivado por media query en pantallas angostas); `COLUMNAS_LARGAS` son las que parten en varias líneas en vez de estirar la tabla.
+- **La tabla necesita `overflow: visible`**: `base.css` le pone `overflow: hidden` a toda `table`, y eso convierte a la tabla en el contexto de scroll de sus celdas, así que las columnas `sticky` dejan de fijarse. El redondeo lo da `.repo-tabla-wrap`. La altura de la fila de grupos es fija (`--alto-grupos`) y la segunda fila se pega a ese valor: calculada por contenido, las dos filas del encabezado se montaban una sobre otra.
+- `ETAPA_POR_ESTADO` / `etapa_de()` agrupan los 10 estados en etapas (protocolo, en-curso, revisión, publicado, cerrado) para el color de la chapita. Un estado no mapeado cae en `sin-dato` sin romper nada.
 - `CAMPOS_REQUERIDOS` decide qué cuenta como investigación "completa" en el resumen de arriba. Los campos condicionales NO entran (solo aplican a una opción puntual), o toda fila que no eligió esa opción contaría como incompleta.
-- El filtro de la barra superior es **cliente** (`static/js/repositorio.js`): filtra las filas ya renderizadas por texto, no vuelve al servidor. Cachea el texto de cada fila una sola vez.
+- El filtro de la barra superior es **cliente** (`static/js/repositorio.js`): filtra lo ya renderizado por texto, no vuelve al servidor. Funciona en las dos vistas porque filtra todo lo marcado con `[data-filtrable]` (la tarjeta o la fila), y cachea el texto de cada uno una sola vez.
 - `guardar` y `actualizar` redirigen acá al terminar, para que se vea el registro recién cargado.
+
+### Ficha de una investigación (estudios/detalle.html)
+- `/estudios/<id>` (`estudios.detalle`): todos los datos de una investigación, agrupados por apartado. Es a donde llevan las tarjetas y los títulos de la tabla.
+- Los bloques y campos salen de `GRUPOS_REPOSITORIO`, así que una pregunta nueva aparece sola. El bloque "Registro" se omite: esos datos ya van en el encabezado.
+- La ve cualquiera; el botón "Modificar esta investigación" solo aparece para su autor (`puede_modificar`).
+
+### CSS: el atributo `hidden` y la especificidad
+Varias cosas se ocultan con la propiedad `.hidden` desde JS (campos condicionales del formulario, tarjetas al filtrar, pasos del wizard). La regla del navegador es `[hidden] { display: none }`, con especificidad `(0,1,0)`: **cualquier regla propia con una clase que setee `display` le gana y el elemento se sigue viendo**. Ya pasó dos veces. Si le ponés `display` a algo que después se oculta por JS, agregá también su `[hidden]`:
+```css
+.estudio-grid > label[hidden] { display: none; }
+.est-card[hidden]             { display: none; }
+```
+El smoke test verifica que esas reglas sigan estando.
 
 ### Modificar investigación cargada (estudios/modificar.html)
 - Se identifica el registro **solo por título** (`buscar_estudios_por_titulo`, `LOWER(...) LIKE` para que funcione igual en SQLite y Postgres).
