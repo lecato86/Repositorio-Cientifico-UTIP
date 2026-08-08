@@ -757,6 +757,58 @@
     white-space: nowrap;
 }
 
+/* ------------------------------------------------------------
+   Enlace al artículo publicado
+   ------------------------------------------------------------ */
+
+/* En la tarjeta: va en el pie, al lado de "Modificar", pero como acción
+   secundaria — lleva afuera del sitio, no edita nada. */
+.btn-publicacion {
+    display: inline-block;
+    padding: 7px 10px;
+    border: 1px solid var(--sc-field-line);
+    border-radius: 8px;
+    background: var(--sc-field);
+    color: var(--sc-blue);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: border-color .15s, background .15s;
+}
+
+.btn-publicacion:hover {
+    border-color: var(--sc-cyan);
+    background: #fff;
+}
+
+/* En la ficha: el botón para leerla, y abajo la dirección tal cual quedó
+   guardada, que es un dato del registro y conviene poder ver y copiar. */
+.enlace-publicacion {
+    display: inline-block;
+    color: var(--sc-blue);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.enlace-publicacion:hover { text-decoration: underline; }
+
+.enlace-crudo {
+    display: block;
+    margin-top: 3px;
+    font-size: 12px;
+    color: var(--sc-muted);
+    /* Una URL larga no tiene espacios: sin esto estira la ficha entera. */
+    overflow-wrap: anywhere;
+}
+
+/* En la tabla: la celda es angosta y la URL no tiene dónde cortar. */
+.repo-link-publicacion {
+    color: var(--sc-blue);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
 /* ============================================================
    Bloqueo: intento de editar una investigación ajena
    ============================================================ */

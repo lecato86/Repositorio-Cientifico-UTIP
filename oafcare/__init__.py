@@ -5,6 +5,7 @@ from .auth.models import login_manager
 from .utils.estudio import (
     FUENTES_DATOS, FUENTE_DATOS_OTRA, TEMPORALIDADES,
     OTRAS_INSTITUCIONES, OTRAS_INSTITUCIONES_SI, ESTADOS_INVESTIGACION,
+    ESTADO_PUBLICADO,
 )
 
 
@@ -41,7 +42,9 @@ def create_app(config_class=Config):
             # Apartado 2: investigadores
             "OTRAS_INSTITUCIONES": OTRAS_INSTITUCIONES,
             "OTRAS_INSTITUCIONES_SI": OTRAS_INSTITUCIONES_SI,
+            # Apartado 3: estado de la investigación
             "ESTADOS_INVESTIGACION": ESTADOS_INVESTIGACION,
+            "ESTADO_PUBLICADO": ESTADO_PUBLICADO,
         }
 
     return app

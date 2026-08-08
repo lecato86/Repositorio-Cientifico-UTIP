@@ -150,7 +150,9 @@
 
             <div class="estudio-grid">
                 <label class="col-span-full">¿En qué estado se encuentra actualmente la investigación?
-                    <select name="estado_actual">
+                    {# El id lo necesita estudio_form.js para enganchar el campo
+                       condicional de abajo. #}
+                    <select name="estado_actual" id="estado-actual">
                         <option value="">Elegí una opción...</option>
                         {% for opcion in ESTADOS_INVESTIGACION %}
                         <option value="{{ opcion }}"
@@ -159,6 +161,24 @@
                         </option>
                         {% endfor %}
                     </select>
+                </label>
+
+                {# Solo aplica si la investigación está publicada (ver
+                   estudio_form.js). Sin JS queda visible, que es el
+                   comportamiento seguro. #}
+                <label class="col-span-full"
+                       data-depende-de="estado-actual"
+                       data-mostrar-si="{{ ESTADO_PUBLICADO }}">
+                    ¿Dónde se puede leer la publicación?
+                    <input type="text" name="publicacion_url" inputmode="url"
+                           placeholder="Link de la revista, del repositorio o el DOI"
+                           value="{{ e.get('publicacion_url', '') }}">
+                    <small class="campo-ayuda">
+                        Se puede pegar la dirección completa, el sitio a secas
+                        (<code>revista.com/articulo</code>) o el DOI
+                        (<code>10.1016/j.jpeds.2024.01.002</code>): queda como un
+                        enlace para abrir el artículo desde el repositorio.
+                    </small>
                 </label>
             </div>
         </section>

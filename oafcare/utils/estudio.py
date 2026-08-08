@@ -14,6 +14,8 @@ Cómo agregar una pregunta:
      agregala a GRUPOS_REPOSITORIO en utils/repositorio.py.
 """
 
+import re
+
 # ---------------------------------------------------------------------------
 # Apartado "Sobre el estudio"
 # ---------------------------------------------------------------------------
@@ -72,6 +74,11 @@ ESTADOS_INVESTIGACION = [
     "Finalizado sin publicar",
 ]
 
+# La opción que habilita el campo `publicacion_url`, donde va la dirección en
+# la que se puede leer el artículo. El JS del formulario muestra/oculta ese
+# campo comparando contra este valor.
+ESTADO_PUBLICADO = ESTADOS_INVESTIGACION[7]
+
 
 # ---------------------------------------------------------------------------
 # Columnas de la tabla `estudios`
@@ -95,6 +102,7 @@ ESTUDIO_COLUMNAS = [
     "instituciones_detalle",
     # Apartado 3: estado de la investigación
     "estado_actual",
+    "publicacion_url",
 ]
 
 
@@ -163,8 +171,59 @@ def instituciones_desde_form(data) -> dict:
     }
 
 
-def estado_actual_desde_form(data) -> str:
-    return _opcion_valida(data.get("estado_actual"), ESTADOS_INVESTIGACION)
+# Un DOI suelto: es lo que suele estar a mano en una publicación, y pegado tal
+# cual no es una dirección que el navegador pueda abrir.
+_DOI = re.compile(r"^(?:doi:\s*)?(10\.\d{4,9}/\S+)$", re.IGNORECASE)
+
+# Esquemas que se pueden poner en un href sin riesgo. Cualquier otro
+# (javascript:, data:) se descarta: el valor lo escribe una persona y termina
+# en un enlace que van a tocar los demás.
+_ESQUEMAS_OK = ("http://", "https://")
+
+
+def normalizar_url(valor) -> str:
+    """Deja la dirección de la publicación lista para usar en un enlace.
+
+    Acepta lo que la gente tiene a mano y lo vuelve abrible:
+      - `revista.com/articulo`  -> `https://revista.com/articulo`
+      - `10.1016/j.jpeds.2024`  -> `https://doi.org/10.1016/j.jpeds.2024`
+      - `https://…`             -> tal cual
+
+    Devuelve cadena vacía si no se puede convertir en algo seguro, así nunca
+    llega a un `href` un esquema que ejecute código.
+    """
+    valor = (valor or "").strip()
+    if not valor:
+        return ""
+
+    doi = _DOI.match(valor)
+    if doi:
+        return f"https://doi.org/{doi.group(1)}"
+
+    if valor.lower().startswith(_ESQUEMAS_OK):
+        return valor
+
+    # Sin esquema: se asume web. Con cualquier otro esquema, se descarta.
+    if "://" in valor or valor.lower().startswith(("javascript:", "data:", "vbscript:")):
+        return ""
+
+    return f"https://{valor}"
+
+
+def estado_desde_form(data) -> dict:
+    """Lee el estado actual y, si está publicado, dónde está publicado.
+
+    La dirección solo se conserva cuando el estado es "Publicado": misma regla
+    que `fuente_datos_desde_form` e `instituciones_desde_form`, para que no
+    quede un enlace colgado si el estado vuelve para atrás.
+    """
+    estado = _opcion_valida(data.get("estado_actual"), ESTADOS_INVESTIGACION)
+    url = normalizar_url(data.get("publicacion_url"))
+
+    return {
+        "estado_actual": estado,
+        "publicacion_url": url if estado == ESTADO_PUBLICADO else "",
+    }
 
 
 def estudio_desde_form(data) -> dict:
@@ -189,5 +248,5 @@ def estudio_desde_form(data) -> dict:
         "email_contacto": (data.get("email_contacto") or "").strip(),
         **instituciones_desde_form(data),
         # Apartado 3: estado de la investigación
-        "estado_actual": estado_actual_desde_form(data),
+        **estado_desde_form(data),
     }
