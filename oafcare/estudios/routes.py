@@ -14,7 +14,7 @@ from oafcare.utils.repositorio import (
     GRUPOS_REPOSITORIO, COLUMNAS_REPOSITORIO, COLUMNAS_FIJAS, COLUMNAS_LARGAS,
     resumen_repositorio, etapa_de,
 )
-from oafcare.utils.docs import documentos_disponibles
+from oafcare.utils.docs import documentos_disponibles, pasos_tramite
 
 
 # Mensaje único para cuando alguien intenta editar una investigación ajena.
@@ -248,7 +248,9 @@ def borrar(estudio_id):
 @estudios_bp.route("/como-comenzar")
 @login_required
 def como_comenzar():
-    """Guía de arranque + PDFs descargables (se listan desde `static/docs/`)."""
+    """Trámite ante la Comisión + guía de arranque + PDFs (desde `static/docs/`)."""
     return render_template(
-        "estudios/como_comenzar.html", documentos=documentos_disponibles()
+        "estudios/como_comenzar.html",
+        pasos=pasos_tramite(),
+        documentos=documentos_disponibles(),
     )

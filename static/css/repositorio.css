@@ -895,6 +895,35 @@
     color: var(--sc-muted);
 }
 
+/* Aviso destacado: la aprobación de la Comisión es previa a investigar. */
+.guia-aviso {
+    margin: 0 0 18px;
+    padding: 13px 16px;
+    border: 1px solid rgba(209, 73, 91, .3);
+    border-left: 4px solid #d1495b;
+    border-radius: 10px;
+    background: rgba(209, 73, 91, .07);
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--sc-navy);
+}
+
+/* Pasos que además llevan documentos o un link: necesitan más aire entre sí
+   que los pasos de solo texto. */
+.guia-pasos-docs {
+    gap: 26px;
+}
+
+.guia-pasos-docs .doc-lista,
+.guia-pasos-docs .doc-vacio {
+    margin-top: 11px;
+}
+
+/* Dentro de un paso el link ya viene separado por el párrafo de arriba. */
+.guia-pasos-docs .guia-link-form {
+    margin-top: 11px;
+}
+
 /* Lista de PDFs descargables */
 .doc-lista {
     list-style: none;
