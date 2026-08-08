@@ -24,7 +24,7 @@
 }
 
 .inicio-head h1 span {
-    background: var(--sc-grad);
+    background: var(--sc-grad-fuerte);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -80,7 +80,7 @@
     width: 46px;
     height: 46px;
     border-radius: 12px;
-    background: rgba(34, 197, 94, .12);
+    background: rgba(var(--sc-acento-rgb), .12);
     color: var(--sc-blue);
     margin-bottom: 2px;
 }
@@ -113,7 +113,7 @@
 
 /* La opción "Cómo comenzar" se distingue como material de apoyo */
 .opcion-guia .opcion-icono {
-    background: rgba(20, 83, 45, .10);
+    background: rgba(var(--sc-tinta-rgb), .10);
     color: var(--sc-navy);
 }
 

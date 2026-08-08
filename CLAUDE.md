@@ -156,6 +156,12 @@ El smoke test verifica que esas reglas sigan estando.
 - `base.css` tiene reglas globales: `input, select { width: 100% }`. Para overridear en un contexto específico, usar `width: auto` inline o en el CSS del módulo.
 - Para agregar estilos específicos a una página usar el bloque `{% block extra_css %}`.
 
+### Paleta
+- **Toda la paleta vive en `:root` de `base.css`.** Ningún otro archivo define colores de marca: si hace falta un color, sale de una variable. El verde de OAFCare sobrevivía suelto en cuatro archivos porque los `rgba()` repetían el rgb a mano; para eso están `--sc-acento-rgb` y `--sc-tinta-rgb`, que se usan como `rgba(var(--sc-acento-rgb), .22)`.
+- **Los colores salen del logo**, que tiene dos: el verde `#489D56` y el carbón frío `#3B4649`. El carbón hace de tinta y de neutro (`--sc-navy`, `--sc-ink`, `--sc-muted`, `--sc-line`, `--sc-field`); el verde queda para los acentos (`--sc-cyan`, `--sc-blue`, los degradés). Antes todo era verde saturado — la paleta de OAFCare — y no quedaba un píxel neutro en pantalla.
+- **Hay dos degradés y no son intercambiables.** `--sc-grad` es decorativo (la franja del header, la cinta de las tarjetas): nunca lleva texto encima, así que arranca claro. `--sc-grad-fuerte` va donde hay texto blanco o recortado con `background-clip: text` (botones, nav activo, el "UTIP" de la marca, los números de los pasos): su punto más claro llega a 4,5:1 con blanco. **Si agregás algo con texto sobre degradé, usá `--sc-grad-fuerte`.**
+- Los colores de estado (las chapitas del repositorio, el rojo de "Salir" y del ícono PDF) son **semánticos y no salen de la paleta**: son ámbar/azul/verde/rojo fijos, para que se distingan entre sí sin depender del acento.
+
 ### Templates
 - Todos extienden `base.html`, salvo `auth/login.html`, que es una página suelta (no muestra el navbar).
 - El navbar está en `base.html`. Si necesita verse diferente en una página, hacerlo con CSS en el stylesheet de esa página, no duplicando el HTML.
