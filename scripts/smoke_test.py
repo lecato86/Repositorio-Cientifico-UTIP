@@ -42,6 +42,11 @@ try:
     ANA = {"nombre": "Ana Perez", "dni": "30.123.456"}      # admin (ADMIN_DNIS)
     BETO = {"nombre": "Beto Lopez", "dni": "27999888"}      # usuario comun
 
+    # El telefono y el mail son obligatorios: todo POST que espere guardar
+    # tiene que mandarlos.
+    CONTACTO = {"telefono_contacto": "11 5555-4444",
+                "email_contacto": "contacto@utip.gob.ar"}
+
     with app.test_client() as c:
         # --- login sin contrasena: nombre y apellido + DNI ---
         print("Login:")
@@ -90,17 +95,49 @@ try:
         # "CientÃ­fico". Se chequea en TODAS las pantallas mas abajo.
         check("el titulo no tiene caracteres rotos", "Ã" not in html)
 
-        # --- el formulario tiene las 4 preguntas y sus opciones ---
-        print("\nFormulario (apartado Sobre el estudio):")
+        # --- apartado 1: sobre el estudio ---
+        print("\nFormulario (apartado 1: Sobre el estudio):")
         html = c.get("/nueva-investigacion").get_data(as_text=True)
         for campo in ['name="titulo"', 'name="tema"', 'name="fuente_datos"',
                       'name="fuente_datos_otra"', 'name="temporalidad"']:
             check(f"campo {campo}", campo in html)
-        from oafcare.utils.estudio import FUENTES_DATOS, TEMPORALIDADES
+        from oafcare.utils.estudio import (
+            FUENTES_DATOS, TEMPORALIDADES, OTRAS_INSTITUCIONES,
+            ESTADOS_INVESTIGACION,
+        )
         for opcion in FUENTES_DATOS:
             check(f"opcion fuente: {opcion[:38]}...", opcion in html)
         for opcion in TEMPORALIDADES:
             check(f"opcion temporalidad: {opcion}", opcion in html)
+
+        # --- apartado 2: investigadores ---
+        print("\nFormulario (apartado 2: Investigadores):")
+        check("el stepper muestra el apartado", ">Investigadores</li>" in html)
+        check("hay tres wizard-step", html.count('class="wizard-step"') == 3,
+              str(html.count('class="wizard-step"')))
+        check("el contacto es obligatorio",
+              html.count('type="tel" required') == 1
+              and html.count('type="email" required') == 1)
+        for campo in ['name="director"', 'name="investigadores"',
+                      'name="telefono_contacto"', 'name="email_contacto"',
+                      'name="otras_instituciones"', 'name="instituciones_detalle"',
+                      'name="estado_actual"']:
+            check(f"campo {campo}", campo in html)
+        check("el mail usa type=email (lo valida el navegador)",
+              'name="email_contacto" type="email"' in html)
+        check("el telefono usa type=tel", 'name="telefono_contacto" type="tel"' in html)
+        for opcion in OTRAS_INSTITUCIONES:
+            check(f"opcion instituciones: {opcion}", f'value="{opcion}"' in html)
+        check("el campo de instituciones es condicional",
+              'data-depende-de="otras-instituciones"' in html)
+
+        # --- apartado 3: estado de la investigacion ---
+        print("\nFormulario (apartado 3: Estado):")
+        check("el stepper muestra el apartado", ">Estado</li>" in html)
+        check("el estado NO esta en el apartado de investigadores",
+              html.index('name="estado_actual"') > html.index('data-step="3"'))
+        for opcion in ESTADOS_INVESTIGACION:
+            check(f"opcion estado: {opcion}", opcion in html)
 
         # --- repositorio vacio ---
         print("\nRepositorio vacio:")
@@ -115,6 +152,13 @@ try:
             "fuente_datos": FUENTES_DATOS[2],
             "fuente_datos_otra": "esto no deberia guardarse",
             "temporalidad": "Retrospectivo",
+            "director": "Dra. Marta Suarez",
+            "investigadores": "Ana Perez, Beto Lopez",
+            "telefono_contacto": "11 5555-4444",
+            "email_contacto": "investigacion@utip.gob.ar",
+            "otras_instituciones": "No",
+            "instituciones_detalle": "esto tampoco deberia guardarse",
+            "estado_actual": "Reclutamiento / recolección de datos",
         })
         check("POST redirige al repositorio", r.status_code == 302, f"status {r.status_code}")
         check("redirige a /repositorio",
@@ -129,10 +173,44 @@ try:
         check("NO guarda el detalle de otra fuente (opcion no era 'otras')",
               "esto no deberia guardarse" not in html)
 
-        # --- titulo obligatorio ---
-        print("\nValidacion:")
-        r = c.post("/nueva-investigacion", data={"titulo": "  ", "tema": "x"})
+        # Apartado 2 en la vista de repositorio
+        check("guarda el director", "Dra. Marta Suarez" in html)
+        check("guarda los investigadores", "Beto Lopez" in html)
+        check("guarda el telefono de contacto", "11 5555-4444" in html)
+        check("guarda el mail de contacto", "investigacion@utip.gob.ar" in html)
+        check("guarda el estado actual",
+              "Reclutamiento / recolección de datos" in html)
+        check("con 'No' NO guarda que instituciones",
+              "esto tampoco deberia guardarse" not in html)
+
+        # Con "Si" el detalle SI se guarda
+        c.post("/nueva-investigacion", data={
+            "titulo": "Estudio multicentrico",
+            "otras_instituciones": "Sí",
+            "instituciones_detalle": "Hospital Garrahan, Hospital Gutierrez",
+            "estado_actual": "Publicado",
+            **CONTACTO,
+        })
+        html = c.get("/repositorio").get_data(as_text=True)
+        check("con 'Sí' SI guarda que instituciones",
+              "Hospital Garrahan, Hospital Gutierrez" in html)
+
+        # --- campos obligatorios: titulo + contacto ---
+        print("\nValidacion (obligatorios):")
+        r = c.post("/nueva-investigacion", data={"titulo": "  ", **CONTACTO})
         check("rechaza titulo vacio con 400", r.status_code == 400, f"status {r.status_code}")
+
+        r = c.post("/nueva-investigacion", data={"titulo": "Sin contacto"})
+        cuerpo = r.get_data(as_text=True)
+        check("rechaza sin telefono ni mail", r.status_code == 400, f"status {r.status_code}")
+        check("el mensaje dice que falta el telefono", "teléfono de contacto" in cuerpo, cuerpo)
+        check("el mensaje dice que falta el mail", "mail de contacto" in cuerpo, cuerpo)
+
+        r = c.post("/nueva-investigacion", data={"titulo": "Solo telefono",
+                                                 "telefono_contacto": "11 5555-4444"})
+        check("rechaza si falta solo el mail", r.status_code == 400, f"status {r.status_code}")
+        check("no queda guardado lo rechazado",
+              "Solo telefono" not in c.get("/repositorio").get_data(as_text=True))
 
         # --- "otras fuentes" SI guarda el detalle ---
         r = c.post("/nueva-investigacion", data={
@@ -141,6 +219,7 @@ try:
             "fuente_datos": FUENTES_DATOS[3],
             "fuente_datos_otra": "Registro provincial de egresos",
             "temporalidad": "Prospectivo",
+            **CONTACTO,
         })
         html = c.get("/repositorio").get_data(as_text=True)
         check("con 'otras fuentes' SI guarda el detalle",
@@ -174,6 +253,7 @@ try:
             "fuente_datos": FUENTES_DATOS[1],
             "fuente_datos_otra": "deberia borrarse al cambiar de opcion",
             "temporalidad": "Ambispectivo",
+            **CONTACTO,
         })
         check("actualizar redirige", r.status_code == 302, f"status {r.status_code}")
         html = c.get("/repositorio").get_data(as_text=True)
@@ -221,6 +301,7 @@ try:
         c.post("/nueva-investigacion", data={
             "titulo": "Estudio de Beto", "tema": "Sedacion",
             "fuente_datos": FUENTES_DATOS[0], "temporalidad": "Prospectivo",
+            **CONTACTO,
         })
         r = c.get("/modificar?titulo=Estudio+de+Beto")
         check("una coincidencia propia redirige a editar", r.status_code == 302,
@@ -233,6 +314,7 @@ try:
         r = c.post(f"/estudios/{id_beto}/actualizar", data={
             "titulo": "Estudio de Beto (corregido)", "tema": "Sedacion",
             "fuente_datos": FUENTES_DATOS[0], "temporalidad": "Prospectivo",
+            **CONTACTO,
         })
         check("guarda su propia edicion", r.status_code == 302, f"status {r.status_code}")
         check("el cambio quedo guardado", "Estudio de Beto (corregido)"

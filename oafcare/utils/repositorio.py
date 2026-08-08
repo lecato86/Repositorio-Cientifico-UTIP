@@ -16,6 +16,17 @@ GRUPOS_REPOSITORIO = [
         ("fuente_datos_otra", "Otra fuente (detalle)"),
         ("temporalidad", "Temporalidad"),
     ]),
+    ("Investigadores", [
+        ("director", "Director"),
+        ("investigadores", "Investigadores"),
+        ("telefono_contacto", "Teléfono de contacto"),
+        ("email_contacto", "Mail de contacto"),
+        ("otras_instituciones", "¿Otras instituciones?"),
+        ("instituciones_detalle", "Qué instituciones"),
+    ]),
+    ("Estado", [
+        ("estado_actual", "Estado actual"),
+    ]),
     ("Registro", [
         ("creado_por", "Cargado por"),
         ("creado_en", "Fecha de carga"),
@@ -33,11 +44,19 @@ COLUMNAS_FIJAS = ("titulo",)
 
 # Columnas cuyo texto puede ser largo: la vista las deja partir en varias
 # líneas en vez de forzar el scroll horizontal.
-COLUMNAS_LARGAS = ("tema", "fuente_datos", "fuente_datos_otra")
+COLUMNAS_LARGAS = (
+    "tema", "fuente_datos", "fuente_datos_otra",
+    "investigadores", "instituciones_detalle", "estado_actual",
+)
 
 # Campos que tienen que estar cargados para considerar completa una
-# investigación. `fuente_datos_otra` no entra: solo aplica a una de las opciones.
-CAMPOS_REQUERIDOS = ("titulo", "tema", "fuente_datos", "temporalidad")
+# investigación. Quedan afuera los que solo aplican a una opción puntual
+# (`fuente_datos_otra`, `instituciones_detalle`).
+CAMPOS_REQUERIDOS = (
+    "titulo", "tema", "fuente_datos", "temporalidad",
+    "director", "investigadores", "telefono_contacto", "email_contacto",
+    "otras_instituciones", "estado_actual",
+)
 
 
 def resumen_repositorio(filas) -> dict:

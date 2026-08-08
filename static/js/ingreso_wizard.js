@@ -36,10 +36,15 @@
         }
     }
 
-    // Valida los campos con [required] del paso actual usando la UI nativa.
+    // Valida los campos del paso actual con la UI nativa del navegador: los
+    // [required] vacíos y también los formatos mal escritos (type="email").
+    //
+    // El <form> lleva `novalidate` para que el navegador no reclame por campos
+    // de pasos que todavía no se vieron; por eso la validación se hace paso a
+    // paso desde acá. Un campo vacío sin [required] es válido y no molesta.
     function pasoValido() {
-        const requeridos = steps[idx].querySelectorAll("[required]");
-        for (const campo of requeridos) {
+        const campos = steps[idx].querySelectorAll("input, select, textarea");
+        for (const campo of campos) {
             if (!campo.reportValidity()) {
                 campo.focus();
                 return false;
@@ -56,6 +61,12 @@
         }
     });
 
+    // El submit siempre ocurre en el último paso: se valida antes de mandar,
+    // si no un mail mal escrito se guardaría igual.
+    form.addEventListener("submit", (e) => {
+        if (!pasoValido()) e.preventDefault();
+    });
+
     prevBtn.addEventListener("click", () => {
         if (idx > 0) {
             idx--;
@@ -65,24 +76,10 @@
 
     form.addEventListener("keydown", (e) => {
         if (e.key !== "Enter") return;
-        const t = e.target;
-        if (t.tagName === "TEXTAREA") return;
+        if (e.target.tagName === "TEXTAREA") return;
 
-        // Dentro de la tabla de monitoreo: Enter baja a la celda de abajo
-        // (misma columna), como en una planilla. No cambia de página.
-        const celda = t.closest(".med-table td");
-        if (celda) {
-            e.preventDefault();
-            const fila = celda.parentElement;
-            const siguienteFila = fila.nextElementSibling;
-            if (siguienteFila && siguienteFila.cells[celda.cellIndex]) {
-                const sig = siguienteFila.cells[celda.cellIndex].querySelector("input");
-                if (sig) sig.focus();
-            }
-            return;
-        }
-
-        // En el resto de los pasos (no el último) Enter avanza en vez de mandar.
+        // En los pasos que no son el último, Enter avanza en vez de mandar el
+        // formulario: se carga entero sin tocar el mouse y sin enviar de más.
         if (idx !== last) {
             e.preventDefault();
             nextBtn.click();

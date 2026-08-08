@@ -9,7 +9,7 @@ from .models import (
     buscar_estudios_por_titulo, borrar_estudio, puede_modificar,
 )
 from oafcare.auth.decorators import requiere_editor, requiere_admin
-from oafcare.utils.estudio import estudio_desde_form
+from oafcare.utils.estudio import estudio_desde_form, faltantes
 from oafcare.utils.repositorio import (
     GRUPOS_REPOSITORIO, COLUMNAS_REPOSITORIO, COLUMNAS_FIJAS, COLUMNAS_LARGAS,
     resumen_repositorio,
@@ -29,6 +29,24 @@ def _bloqueo_ajeno(estudio):
         estudio=estudio,
         mensaje=MSG_NO_ES_TU_ESTUDIO,
     ), 403
+
+
+def _falta_algo(datos):
+    """Mensaje 400 si falta un campo obligatorio, o None si está todo.
+
+    El formulario ya los marca `required`, pero el POST es una URL más y puede
+    llegar sin pasar por él (o con el JS desactivado).
+    """
+    falta = faltantes(datos)
+    if not falta:
+        return None
+
+    if len(falta) == 1:
+        detalle = falta[0]
+    else:
+        detalle = ", ".join(falta[:-1]) + " y " + falta[-1]
+
+    return f"Falta completar {detalle}.", 400
 
 
 # ------------------ INICIO (menú principal) ------------------
@@ -61,8 +79,9 @@ def nueva():
 @requiere_editor
 def guardar():
     datos = estudio_desde_form(request.form)
-    if not datos["titulo"]:
-        return "El título del estudio es obligatorio.", 400
+    error = _falta_algo(datos)
+    if error:
+        return error
 
     crear_estudio(datos, current_user.nombre, current_user.dni)
 
@@ -175,8 +194,9 @@ def actualizar(estudio_id):
         return _bloqueo_ajeno(estudio)
 
     datos = estudio_desde_form(request.form)
-    if not datos["titulo"]:
-        return "El título del estudio es obligatorio.", 400
+    error = _falta_algo(datos)
+    if error:
+        return error
 
     actualizar_estudio(estudio_id, datos)
 
