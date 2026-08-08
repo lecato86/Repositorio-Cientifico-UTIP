@@ -67,8 +67,9 @@
                         {% else %}
                         <b>Cargar nueva investigación</b>
                         {% endif %}
-                        y completá los apartados. Lo único obligatorio para guardar es
-                        el título; el resto se puede completar después.
+                        y completá los tres apartados. Para guardar son obligatorios
+                        el <b>título</b>, el <b>teléfono</b> y el <b>mail de
+                        contacto</b>; el resto se puede completar después.
                     </p>
                 </div>
             </li>
@@ -88,9 +89,10 @@
                     <h3>Verificá que quedó cargada</h3>
                     <p>
                         Después de guardar vas a caer en
-                        <a href="{{ url_for('estudios.repositorio') }}">Consultar repositorio</a>,
-                        donde se ve la base completa. Buscá tu investigación con el
-                        filtro y revisá que los campos estén como los cargaste.
+                        <a href="{{ url_for('estudios.repositorio') }}">Consultar el repositorio</a>,
+                        donde cada investigación es una tarjeta. Buscá la tuya con el
+                        filtro y tocala: se abre su ficha con todos los datos como los
+                        cargaste.
                     </p>
                 </div>
             </li>
@@ -136,15 +138,42 @@
             </li>
             <li>
                 <div>
-                    <h3>Permisos</h3>
+                    <h3>Solo vos podés modificar lo que cargaste</h3>
                     <p>
-                        Consultar el repositorio está disponible para todos los
-                        usuarios. Cargar y modificar requiere rol de editor o
-                        administrador; borrar, de administrador.
+                        Las investigaciones se pueden consultar entre todos, pero
+                        para modificar una hay que haberla cargado: se compara el
+                        DNI con el que entraste. Si no coincide, la app no te deja
+                        editarla.
                     </p>
                 </div>
             </li>
         </ol>
+    </div>
+
+    {# Enlace al sitio del Comité. Se muestra el nombre, no la dirección: la URL
+       es larga y con caracteres escapados, y pegada entera se lee mal. #}
+    <div class="guia-bloque">
+        <h2>Comité de Capacitación</h2>
+        <p>
+            Antes de empezar conviene pasar por el sitio del Comité: ahí están los
+            requisitos, los formularios y los pasos para presentar un protocolo.
+        </p>
+
+        <a class="guia-link"
+           href="https://sites.google.com/fcm.unc.edu.ar/hnst/comit%C3%A9/c-investigaci%C3%B3n"
+           target="_blank" rel="noopener noreferrer">
+            <span class="guia-link-icono">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="9"/>
+                    <path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18"/>
+                </svg>
+            </span>
+            <span class="guia-link-texto">
+                <span class="guia-link-nombre">Ir al sitio del Comité</span>
+                <span class="guia-link-detalle">Sección Investigación · se abre en otra pestaña</span>
+            </span>
+            <span class="guia-link-flecha" aria-hidden="true">↗</span>
+        </a>
     </div>
 </section>
 {% endblock %}

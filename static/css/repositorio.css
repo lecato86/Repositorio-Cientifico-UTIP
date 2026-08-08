@@ -970,6 +970,69 @@
     font-size: 12.5px;
 }
 
+/* Enlace a un sitio externo (Comité). Se muestra el nombre y no la dirección:
+   la URL es larga y con caracteres escapados, pegada entera no se entiende. */
+.guia-link {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 15px 18px;
+    border: 1px solid var(--sc-field-line);
+    border-radius: 11px;
+    background: var(--sc-field);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color .15s, background .15s, transform .15s;
+}
+
+.guia-link:hover {
+    border-color: var(--sc-teal);
+    background: white;
+    transform: translateY(-1px);
+}
+
+.guia-link-icono {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--sc-grad);
+    color: white;
+}
+
+.guia-link-icono svg {
+    width: 21px;
+    height: 21px;
+}
+
+.guia-link-texto {
+    flex: 1;
+    min-width: 0;
+}
+
+.guia-link-nombre {
+    display: block;
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--sc-navy);
+}
+
+.guia-link-detalle {
+    display: block;
+    margin-top: 2px;
+    font-size: 12.5px;
+    color: var(--sc-muted);
+}
+
+.guia-link-flecha {
+    flex: none;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--sc-blue);
+}
+
 @media (max-width: 860px) {
     .repo-resumen {
         grid-template-columns: repeat(2, minmax(0, 1fr));
