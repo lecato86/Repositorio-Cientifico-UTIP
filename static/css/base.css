@@ -63,31 +63,20 @@ body {
     color: var(--sc-navy);
 }
 
-/* Brand wordmark next to the logo */
+/* El logo es la marca: trae el nombre adentro, no lleva texto al lado. */
 .brand {
     display: flex;
     align-items: center;
-    gap: 11px;
     padding-right: 8px;
     text-decoration: none;
 }
 
-.brand .wordmark {
-    font-size: 21px;
-    font-weight: 800;
-    letter-spacing: -.3px;
-    white-space: nowrap;
-}
-
-.brand .wordmark .stat {
-    color: var(--sc-navy);
-}
-
-.brand .wordmark .care {
-    background: var(--sc-grad);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+/* El PNG tiene el fondo transparente y el margen recortado, así que la altura
+   que se le da acá es la del dibujo, sin aire alrededor. El atributo height del
+   HTML lleva el mismo valor para que no salte el layout mientras carga. */
+.brand img {
+    height: 52px;
+    width: auto;
 }
 
 .nav {
