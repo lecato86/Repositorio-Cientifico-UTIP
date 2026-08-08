@@ -12,7 +12,7 @@ from oafcare.auth.decorators import requiere_editor, requiere_admin
 from oafcare.utils.estudio import estudio_desde_form, faltantes
 from oafcare.utils.repositorio import (
     GRUPOS_REPOSITORIO, COLUMNAS_REPOSITORIO, COLUMNAS_FIJAS, COLUMNAS_LARGAS,
-    resumen_repositorio, etapa_de,
+    COLUMNAS_ENLACE, resumen_repositorio, etapa_de,
 )
 from oafcare.utils.docs import documentos_disponibles, pasos_tramite
 
@@ -118,6 +118,7 @@ def repositorio():
         columnas=COLUMNAS_REPOSITORIO,
         columnas_fijas=COLUMNAS_FIJAS,
         columnas_largas=COLUMNAS_LARGAS,
+        columnas_enlace=COLUMNAS_ENLACE,
         resumen=resumen_repositorio(estudios),
         editables=editables,
         etapas=etapas,
@@ -140,6 +141,7 @@ def detalle(estudio_id):
         "estudios/detalle.html",
         e=estudio,
         grupos=GRUPOS_REPOSITORIO,
+        columnas_enlace=COLUMNAS_ENLACE,
         etapa=etapa_de(estudio["estado_actual"]),
         puede_editar=puede_modificar(estudio, current_user),
     )

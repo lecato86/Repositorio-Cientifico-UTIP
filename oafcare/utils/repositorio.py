@@ -26,6 +26,7 @@ GRUPOS_REPOSITORIO = [
     ]),
     ("Estado", [
         ("estado_actual", "Estado actual"),
+        ("publicacion_url", "Dónde está publicado"),
     ]),
     ("Registro", [
         ("creado_por", "Cargado por"),
@@ -47,11 +48,16 @@ COLUMNAS_FIJAS = ("titulo",)
 COLUMNAS_LARGAS = (
     "tema", "fuente_datos", "fuente_datos_otra",
     "investigadores", "instituciones_detalle", "estado_actual",
+    "publicacion_url",
 )
+
+# Columnas cuyo valor es una dirección web: la tabla y la ficha las muestran
+# como un enlace en vez de como texto.
+COLUMNAS_ENLACE = ("publicacion_url",)
 
 # Campos que tienen que estar cargados para considerar completa una
 # investigación. Quedan afuera los que solo aplican a una opción puntual
-# (`fuente_datos_otra`, `instituciones_detalle`).
+# (`fuente_datos_otra`, `instituciones_detalle`, `publicacion_url`).
 CAMPOS_REQUERIDOS = (
     "titulo", "tema", "fuente_datos", "temporalidad",
     "director", "investigadores", "telefono_contacto", "email_contacto",

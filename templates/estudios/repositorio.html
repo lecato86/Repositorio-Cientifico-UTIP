@@ -112,6 +112,15 @@
                     {%- if est['creado_en'] %} · {{ est['creado_en'][:10] }}{% endif %}
                 </span>
                 <span class="est-acciones">
+                    {# El enlace al artículo va acá y no dentro de la tarjeta:
+                       la tarjeta entera ya es un <a> a la ficha y no se pueden
+                       anidar. La dirección llega normalizada del guardado. #}
+                    {% if est['publicacion_url'] %}
+                    <a class="btn-publicacion" href="{{ est['publicacion_url'] }}"
+                       target="_blank" rel="noopener noreferrer">
+                        Leer publicación <span aria-hidden="true">↗</span>
+                    </a>
+                    {% endif %}
                     {# Solo quien la cargó puede modificarla. #}
                     {% if editables[est['id']] %}
                     <a class="btn-editar"
@@ -166,6 +175,10 @@
                            href="{{ url_for('estudios.detalle', estudio_id=est['id']) }}">
                             {{ est[clave] or 'Sin título' }}
                         </a>
+                        {% elif est[clave] and clave in columnas_enlace %}
+                        {# Ya viene normalizada a http/https desde el guardado. #}
+                        <a class="repo-link-publicacion" href="{{ est[clave] }}"
+                           target="_blank" rel="noopener noreferrer">{{ est[clave] }}</a>
                         {% else %}
                         {{ est[clave] if est[clave] not in (None, '') else '—' }}
                         {% endif %}

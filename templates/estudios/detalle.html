@@ -42,7 +42,19 @@
             {% set valor = e[clave] %}
             <div class="{% if not valor %}is-vacio{% endif %}">
                 <dt>{{ etiqueta }}</dt>
-                <dd>{{ valor if valor else 'Sin completar' }}</dd>
+                <dd>
+                    {%- if valor and clave in columnas_enlace -%}
+                    {# La dirección la normaliza `normalizar_url` al guardar, que
+                       deja solo http/https: acá ya llega lista para el href. #}
+                    <a class="enlace-publicacion" href="{{ valor }}"
+                       target="_blank" rel="noopener noreferrer">
+                        Leer la publicación <span aria-hidden="true">↗</span>
+                    </a>
+                    <span class="enlace-crudo">{{ valor }}</span>
+                    {%- else -%}
+                    {{ valor if valor else 'Sin completar' }}
+                    {%- endif -%}
+                </dd>
             </div>
             {% endfor %}
         </dl>
