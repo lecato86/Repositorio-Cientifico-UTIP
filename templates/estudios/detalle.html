@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}{{ e['titulo'] or 'Investigación' }} — Repositorio Científico UTIP{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/repositorio.css') }}">
+{% endblock %}
+{% block content %}
+{# Ficha completa de una investigación. Los bloques y sus campos salen de
+   GRUPOS_REPOSITORIO (utils/repositorio.py), el mismo lugar que usa la tabla:
+   al sumar una pregunta aparece acá sola, sin tocar este template. #}
+<section class="ficha">
+    <a class="repo-volver ficha-volver" href="{{ url_for('estudios.repositorio') }}">
+        ← Volver al repositorio
+    </a>
+
+    <header class="ficha-head">
+        <span class="est-estado est-estado--{{ etapa }}">
+            {{ e['estado_actual'] or 'Sin estado' }}
+        </span>
+        <h1>{{ e['titulo'] or 'Sin título' }}</h1>
+        <p class="ficha-meta">
+            Cargada por <b>{{ e['creado_por'] or '—' }}</b>
+            {%- if e['creado_en'] %} el {{ e['creado_en'] }}{% endif -%}
+            {%- if e['actualizado_en'] and e['actualizado_en'] != e['creado_en'] %}
+            · última modificación {{ e['actualizado_en'] }}
+            {%- endif %}
+        </p>
+
+        {% if puede_editar %}
+        <a class="ficha-editar" href="{{ url_for('estudios.editar', estudio_id=e['id']) }}">
+            Modificar esta investigación
+        </a>
+        {% endif %}
+    </header>
+
+    {% for titulo_grupo, campos in grupos %}
+    {# El bloque "Registro" ya se muestra en el encabezado. #}
+    {% if titulo_grupo != 'Registro' %}
+    <div class="ficha-bloque">
+        <h2>{{ titulo_grupo }}</h2>
+        <dl class="ficha-campos">
+            {% for clave, etiqueta in campos %}
+            {% set valor = e[clave] %}
+            <div class="{% if not valor %}is-vacio{% endif %}">
+                <dt>{{ etiqueta }}</dt>
+                <dd>{{ valor if valor else 'Sin completar' }}</dd>
+            </div>
+            {% endfor %}
+        </dl>
+    </div>
+    {% endif %}
+    {% endfor %}
+</section>
+{% endblock %}

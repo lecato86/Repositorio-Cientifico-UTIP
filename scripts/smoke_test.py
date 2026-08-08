@@ -47,6 +47,11 @@ try:
     CONTACTO = {"telefono_contacto": "11 5555-4444",
                 "email_contacto": "contacto@utip.gob.ar"}
 
+    # La vista por defecto del repositorio son tarjetas (un resumen). Para
+    # comprobar que un dato quedo guardado hay que mirar la tabla, que es la
+    # que muestra todas las columnas.
+    TABLA = "/repositorio?vista=tabla"
+
     with app.test_client() as c:
         # --- login sin contrasena: nombre y apellido + DNI ---
         print("Login:")
@@ -141,7 +146,7 @@ try:
 
         # --- repositorio vacio ---
         print("\nRepositorio vacio:")
-        html = c.get("/repositorio").get_data(as_text=True)
+        html = c.get(TABLA).get_data(as_text=True)
         check("muestra el estado vacio", "Todavía no hay investigaciones" in html)
 
         # --- guardar una investigacion ---
@@ -165,7 +170,7 @@ try:
               r.headers.get("Location", "").endswith("/repositorio"),
               r.headers.get("Location"))
 
-        html = c.get("/repositorio").get_data(as_text=True)
+        html = c.get(TABLA).get_data(as_text=True)
         check("la investigacion aparece en la tabla",
               "Ventilacion no invasiva en bronquiolitis" in html)
         check("guarda la temporalidad", "Retrospectivo" in html)
@@ -191,7 +196,7 @@ try:
             "estado_actual": "Publicado",
             **CONTACTO,
         })
-        html = c.get("/repositorio").get_data(as_text=True)
+        html = c.get(TABLA).get_data(as_text=True)
         check("con 'Sí' SI guarda que instituciones",
               "Hospital Garrahan, Hospital Gutierrez" in html)
 
@@ -210,7 +215,7 @@ try:
                                                  "telefono_contacto": "11 5555-4444"})
         check("rechaza si falta solo el mail", r.status_code == 400, f"status {r.status_code}")
         check("no queda guardado lo rechazado",
-              "Solo telefono" not in c.get("/repositorio").get_data(as_text=True))
+              "Solo telefono" not in c.get(TABLA).get_data(as_text=True))
 
         # --- "otras fuentes" SI guarda el detalle ---
         r = c.post("/nueva-investigacion", data={
@@ -221,9 +226,43 @@ try:
             "temporalidad": "Prospectivo",
             **CONTACTO,
         })
-        html = c.get("/repositorio").get_data(as_text=True)
+        html = c.get(TABLA).get_data(as_text=True)
         check("con 'otras fuentes' SI guarda el detalle",
               "Registro provincial de egresos" in html)
+
+        # --- vista de tarjetas (por defecto) y vista de tabla ---
+        print("\nRepositorio: tarjetas y tabla:")
+        html = c.get("/repositorio").get_data(as_text=True)
+        check("por defecto muestra tarjetas", 'class="est-card"' in html)
+        check("por defecto NO muestra la tabla", 'id="repo-tabla"' not in html)
+        check("la tarjeta linkea a la ficha", "/estudios/1</a>" in html
+              or 'href="/estudios/1"' in html)
+        check("la tarjeta muestra la chapita de estado", "est-estado--" in html)
+        check("se puede filtrar", html.count("data-filtrable") >= 2)
+
+        html = c.get("/repositorio?vista=tabla").get_data(as_text=True)
+        check("?vista=tabla muestra la tabla", 'id="repo-tabla"' in html)
+        check("?vista=tabla NO muestra tarjetas", 'class="est-card"' not in html)
+        check("la tabla tiene la columna fija", "repo-fija-titulo" in html)
+        check("el titulo de la tabla linkea a la ficha",
+              "repo-link-detalle" in html)
+
+        # --- ficha de una investigacion ---
+        print("\nFicha de una investigacion:")
+        r = c.get("/estudios/1")
+        html = r.get_data(as_text=True)
+        check("GET /estudios/1 200", r.status_code == 200, f"status {r.status_code}")
+        check("muestra el titulo",
+              "Ventilacion no invasiva en bronquiolitis" in html)
+        check("muestra los bloques del formulario",
+              "Sobre el estudio" in html and "Investigadores" in html
+              and "Estado" in html)
+        check("muestra un dato del apartado 2", "Dra. Marta Suarez" in html)
+        check("marca los campos sin completar", "Sin completar" in html)
+        check("ofrece modificar (es de quien la cargo)", "ficha-editar" in html)
+        r = c.get("/estudios/99999")
+        check("una ficha inexistente redirige", r.status_code == 302,
+              f"status {r.status_code}")
 
         # --- buscar por titulo: una sola coincidencia redirige a editar ---
         print("\nModificar por titulo:")
@@ -256,7 +295,7 @@ try:
             **CONTACTO,
         })
         check("actualizar redirige", r.status_code == 302, f"status {r.status_code}")
-        html = c.get("/repositorio").get_data(as_text=True)
+        html = c.get(TABLA).get_data(as_text=True)
         check("guarda el titulo corregido",
               "Estudio con fuente externa (corregido)" in html)
         check("guarda la temporalidad nueva", "Ambispectivo" in html)
@@ -268,7 +307,7 @@ try:
         c.get("/logout")
         c.post("/login", data=BETO)
 
-        r = c.get("/repositorio")
+        r = c.get(TABLA)
         html = r.get_data(as_text=True)
         check("SI puede consultar el repositorio", r.status_code == 200)
         check("ve la investigacion de la otra persona",
@@ -287,7 +326,7 @@ try:
         })
         check("POST de actualizar lo ajeno tambien da 403", r.status_code == 403,
               f"status {r.status_code}")
-        html = c.get("/repositorio").get_data(as_text=True)
+        html = c.get(TABLA).get_data(as_text=True)
         check("el estudio ajeno quedo intacto", "PISADO POR OTRO USUARIO" not in html)
 
         r = c.get("/modificar?titulo=fuente+externa")
@@ -318,13 +357,13 @@ try:
         })
         check("guarda su propia edicion", r.status_code == 302, f"status {r.status_code}")
         check("el cambio quedo guardado", "Estudio de Beto (corregido)"
-              in c.get("/repositorio").get_data(as_text=True))
+              in c.get(TABLA).get_data(as_text=True))
 
         # --- mismo DNI escrito con puntos = mismo usuario ---
         print("\nEl DNI se normaliza:")
         c.get("/logout")
         c.post("/login", data={"nombre": "Beto Lopez", "dni": "27.999.888"})
-        html = c.get("/repositorio").get_data(as_text=True)
+        html = c.get(TABLA).get_data(as_text=True)
         check("con puntos entra como el mismo usuario y edita lo suyo",
               "btn-editar" in html)
 
@@ -358,6 +397,31 @@ try:
         )
         _c.close()
         check("solo queda la tabla estudios", tablas == ["estudios"], str(tablas))
+
+        # --- reglas CSS de las que depende el comportamiento ---
+        # No se puede renderizar sin navegador, pero estas tres ya fallaron una
+        # vez y el sintoma no se nota leyendo el codigo, asi que quedan atadas.
+        print("\nCSS del que depende el comportamiento:")
+        import io as _io
+
+        def css(nombre):
+            return _io.open(os.path.join(BASE, "static", "css", nombre),
+                            encoding="utf-8").read()
+
+        estudio_css = css("estudio.css")
+        repo_css = css("repositorio.css")
+
+        # `[hidden]` del navegador pierde por especificidad contra un
+        # `display:` con clase. Sin estas reglas, el campo condicional se
+        # muestra siempre y el filtro no oculta ninguna tarjeta.
+        check("los campos condicionales se pueden ocultar",
+              ".estudio-grid > label[hidden]" in estudio_css)
+        check("las tarjetas se pueden ocultar al filtrar",
+              ".est-card[hidden]" in repo_css)
+        # base.css le pone overflow:hidden a toda `table`, y eso rompe el
+        # position:sticky de la columna de titulo.
+        check("la tabla no recorta el sticky de la columna fija",
+              "overflow: visible" in repo_css)
 
         # --- acentos: ninguna pantalla con la codificacion rota ---
         # "Ã", "Â" y "â€" son lo que se ve cuando bytes UTF-8 se guardaron

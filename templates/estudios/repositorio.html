@@ -10,7 +10,13 @@
     <header class="repo-head">
         <div>
             <h1>Repositorio de investigaciones</h1>
-            <p>Base de datos completa: cada fila es una investigación cargada.</p>
+            <p>
+                {% if vista == 'tabla' %}
+                Planilla completa: una fila por investigación, con todos los campos.
+                {% else %}
+                Tocá una investigación para ver toda su información.
+                {% endif %}
+            </p>
         </div>
         <a class="repo-volver" href="{{ url_for('estudios.inicio') }}">← Inicio</a>
     </header>
@@ -22,7 +28,7 @@
         </div>
         <div class="tile">
             <span class="tile-valor">{{ resumen.completas }}</span>
-            <span class="tile-label">Con el apartado completo</span>
+            <span class="tile-label">Con todo completo</span>
         </div>
         <div class="tile">
             <span class="tile-valor">{{ resumen.incompletas }}</span>
@@ -43,16 +49,93 @@
     </p>
     {% else %}
 
-    {# Filtro en vivo por texto: no vuelve al servidor, filtra las filas ya
-       renderizadas (ver repositorio.js). #}
+    {# Filtro en vivo por texto: no vuelve al servidor, filtra lo ya
+       renderizado (ver repositorio.js). Sirve para las dos vistas. #}
     <div class="repo-barra">
         <input id="repo-filtro" type="search" autocomplete="off"
-               placeholder="Filtrar por cualquier dato (título, tema, temporalidad...)">
+               placeholder="Filtrar por cualquier dato (título, tema, director, estado...)">
         <span class="repo-conteo" id="repo-conteo">
             {{ estudios | length }} de {{ estudios | length }}
         </span>
+
+        {# Dos vistas de lo mismo: tarjetas para mirar, tabla para comparar. #}
+        <div class="repo-vistas" role="group" aria-label="Forma de ver el repositorio">
+            <a class="{% if vista != 'tabla' %}is-activa{% endif %}"
+               href="{{ url_for('estudios.repositorio') }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="8" height="8" rx="1.5"/>
+                    <rect x="13" y="3" width="8" height="8" rx="1.5"/>
+                    <rect x="3" y="13" width="8" height="8" rx="1.5"/>
+                    <rect x="13" y="13" width="8" height="8" rx="1.5"/>
+                </svg>Tarjetas</a>
+            <a class="{% if vista == 'tabla' %}is-activa{% endif %}"
+               href="{{ url_for('estudios.repositorio', vista='tabla') }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="16" rx="1.5"/>
+                    <path d="M3 9h18M3 14h18M9 9v11"/>
+                </svg>Tabla</a>
+        </div>
     </div>
 
+    {# ==================== VISTA TARJETAS ==================== #}
+    {% if vista != 'tabla' %}
+    <div class="repo-tarjetas" id="repo-tarjetas">
+        {% for est in estudios %}
+        <article class="est-card" data-filtrable>
+            <a class="est-card-link" href="{{ url_for('estudios.detalle', estudio_id=est['id']) }}">
+                <span class="est-estado est-estado--{{ etapas[est['id']] }}">
+                    {{ est['estado_actual'] or 'Sin estado' }}
+                </span>
+
+                <h2 class="est-titulo">{{ est['titulo'] or 'Sin título' }}</h2>
+
+                {% if est['tema'] %}
+                <p class="est-tema">{{ est['tema'] }}</p>
+                {% endif %}
+
+                <dl class="est-datos">
+                    {% if est['director'] %}
+                    <div><dt>Director</dt><dd>{{ est['director'] }}</dd></div>
+                    {% endif %}
+                    {% if est['temporalidad'] %}
+                    <div><dt>Temporalidad</dt><dd>{{ est['temporalidad'] }}</dd></div>
+                    {% endif %}
+                    {% if est['otras_instituciones'] == 'Sí' %}
+                    <div><dt>Multicéntrico</dt><dd>{{ est['instituciones_detalle'] or 'Sí' }}</dd></div>
+                    {% endif %}
+                </dl>
+            </a>
+
+            <footer class="est-pie">
+                <span class="est-autor">
+                    {{ est['creado_por'] or '—' }}
+                    {%- if est['creado_en'] %} · {{ est['creado_en'][:10] }}{% endif %}
+                </span>
+                <span class="est-acciones">
+                    {# Solo quien la cargó puede modificarla. #}
+                    {% if editables[est['id']] %}
+                    <a class="btn-editar"
+                       href="{{ url_for('estudios.editar', estudio_id=est['id']) }}">Modificar</a>
+                    {% endif %}
+                    {% if current_user.rol == 'admin' %}
+                    <form action="{{ url_for('estudios.borrar', estudio_id=est['id']) }}"
+                          method="post" class="repo-borrar"
+                          onsubmit="return confirm('¿Borrar DEFINITIVAMENTE la investigación &quot;{{ est['titulo'] }}&quot;?\n\nEsta acción NO se puede deshacer.');">
+                        <button type="submit">Borrar</button>
+                    </form>
+                    {% endif %}
+                </span>
+            </footer>
+        </article>
+        {% endfor %}
+    </div>
+
+    <p class="repo-sin-coincidencias" id="repo-sin-coincidencias" hidden>
+        Ninguna investigación coincide con lo que buscás.
+    </p>
+
+    {# ==================== VISTA TABLA ==================== #}
+    {% else %}
     <div class="repo-tabla-wrap">
         <table class="repo-tabla" id="repo-tabla">
             <thead>
@@ -74,16 +157,21 @@
             </thead>
             <tbody>
             {% for est in estudios %}
-                <tr>
+                <tr data-filtrable>
                     {% for clave, etiqueta in columnas %}
                     <td class="{% if clave in columnas_fijas %}repo-fija repo-fija-{{ clave }}{% endif %}
                                {%- if clave in columnas_largas %} repo-larga{% endif %}">
+                        {% if clave == 'titulo' %}
+                        <a class="repo-link-detalle"
+                           href="{{ url_for('estudios.detalle', estudio_id=est['id']) }}">
+                            {{ est[clave] or 'Sin título' }}
+                        </a>
+                        {% else %}
                         {{ est[clave] if est[clave] not in (None, '') else '—' }}
+                        {% endif %}
                     </td>
                     {% endfor %}
                     <td class="repo-acciones">
-                        {# Solo quien cargó la investigación puede modificarla:
-                           en las ajenas no se ofrece el botón. #}
                         {% if editables[est['id']] %}
                         <a class="btn-editar"
                            href="{{ url_for('estudios.editar', estudio_id=est['id']) }}">Modificar</a>
@@ -104,7 +192,9 @@
 
     <p class="repo-nota">
         La tabla scrollea en horizontal; el título queda fijo a la izquierda.
+        Tocá un título para ver la investigación completa.
     </p>
+    {% endif %}
     {% endif %}
 </section>
 {% endblock %}

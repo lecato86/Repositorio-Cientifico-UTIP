@@ -59,6 +59,32 @@ CAMPOS_REQUERIDOS = (
 )
 
 
+# Etapa a la que pertenece cada estado. La vista de tarjetas la usa para
+# pintar la chapita de color: de un vistazo se ve en qué punto está cada
+# investigación sin leer el texto.
+ETAPA_POR_ESTADO = {
+    "Protocolo en elaboración": "protocolo",
+    "Protocolo terminado": "protocolo",
+    "Protocolo aprobado": "protocolo",
+    "Reclutamiento / recolección de datos": "en-curso",
+    "Análisis de datos": "en-curso",
+    "Manuscrito en elaboración": "en-curso",
+    "En revisión en revista": "revision",
+    "Publicado": "publicado",
+    "Suspendido": "cerrado",
+    "Finalizado sin publicar": "cerrado",
+}
+
+
+def etapa_de(estado) -> str:
+    """Etapa de un estado, para elegir el color de la chapita.
+
+    Un estado desconocido (o vacío) cae en 'sin-dato': la vista no se rompe si
+    alguna vez se agrega una opción y se olvida de mapearla acá.
+    """
+    return ETAPA_POR_ESTADO.get((estado or "").strip(), "sin-dato")
+
+
 def resumen_repositorio(filas) -> dict:
     """Contadores para la banda superior de la vista de repositorio."""
     total = len(filas)
