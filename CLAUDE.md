@@ -148,7 +148,9 @@ El smoke test verifica que esas reglas sigan estando.
 - La búsqueda lista **todas** las coincidencias, sean de quien sean. Redirige directo a `estudios.editar` solo cuando hay **una sola coincidencia Y es del usuario en sesión**; las ajenas se listan sin link, con la clase `.inv-ajena`. Los títulos no son únicos: dos investigaciones pueden compartirlo.
 
 ### Cómo comenzar (estudios/como_comenzar.html)
-- Guía de arranque + PDFs descargables. **Los PDFs no están hardcodeados**: `utils/docs.py` lista los `.pdf` de `static/docs/` y arma el título desde el nombre del archivo. Para publicar material nuevo se copia el archivo ahí, sin tocar código. Si la carpeta no existe, la lista queda vacía sin fallar.
+- Guía de arranque + el trámite ante la Comisión + PDFs descargables. **Los PDFs no están hardcodeados**: `utils/docs.py` lista los `.pdf` de `static/docs/` y arma el título desde el nombre del archivo. Para publicar material nuevo se copia el archivo ahí, sin tocar código. Si la carpeta no existe, la lista queda vacía sin fallar.
+- **El trámite de evaluación es lo primero de la página** y sale de `PASOS_TRAMITE` (`utils/docs.py`): título, texto y, según el paso, una `carpeta` de PDFs o un `formulario` (link). Los tres pasos de hoy son *Escritura del trabajo final* (guía y checklist), *Notas de solicitud* y *Solicitud de evaluación* (el Google Form de la Comisión, `FORMULARIO_COMISION`). La plantilla los recorre y los numera con el contador CSS de `.guia-pasos`, así que **si se agrega un paso en el medio hay que revisar el texto del paso 2, que referencia "el Paso 3" a mano**.
+- **Una carpeta por paso** dentro de `static/docs/`: `1-escritura-del-trabajo-final/`, `2-notas-de-solicitud/`. Los PDFs sueltos en la raíz de `static/docs/` caen en el bloque "Otros documentos", que no se muestra si no hay ninguno. Un paso con la carpeta vacía muestra un cartel diciendo dónde copiar el archivo.
 
 ### CSS
 - `base.css` tiene reglas globales: `input, select { width: 100% }`. Para overridear en un contexto específico, usar `width: auto` inline o en el CSS del módulo.

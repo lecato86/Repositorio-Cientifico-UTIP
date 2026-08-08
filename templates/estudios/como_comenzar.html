@@ -15,11 +15,84 @@
         <a class="repo-volver" href="{{ url_for('estudios.inicio') }}">← Inicio</a>
     </header>
 
+    {# El trámite ante la Comisión va primero: sin su aprobación no se investiga.
+       Los pasos y sus PDFs salen de `utils/docs.py`, uno por carpeta. #}
     <div class="guia-bloque">
-        <h2>Documentos para descargar</h2>
-        <p>Material de consulta en PDF: protocolos, instructivos y formularios.</p>
+        <h2>Evaluación de la Comisión de Investigación</h2>
+        <p>
+            Los tres pasos para presentar un protocolo. Los documentos se
+            descargan acá y se adjuntan en el formulario del último paso.
+        </p>
 
-        {% if documentos %}
+        <p class="guia-aviso">
+            <b>La aprobación de la Comisión de Investigación es previa a la
+            investigación.</b> Ningún estudio puede comenzar sin que la Comisión
+            haya evaluado y aprobado su protocolo.
+        </p>
+
+        <ol class="guia-pasos guia-pasos-docs">
+            {% for paso in pasos %}
+            <li>
+                <div>
+                    <h3>{{ paso.titulo }}</h3>
+                    <p>{{ paso.texto }}</p>
+
+                    {% if paso.carpeta %}
+                        {% if paso.documentos %}
+                        <ul class="doc-lista">
+                            {% for doc in paso.documentos %}
+                            <li>
+                                <a href="{{ url_for('static', filename=doc.archivo) }}" download>
+                                    <span class="doc-icono">PDF</span>
+                                    <span>
+                                        <span class="doc-nombre">{{ doc.titulo }}</span>
+                                        <span class="doc-peso">{{ doc.kb }} KB</span>
+                                    </span>
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p class="doc-vacio">
+                            Todavía no hay documentos en este paso. Para publicar uno,
+                            copiá el PDF en
+                            <code>static/docs/{{ paso.carpeta }}/</code>
+                            y aparece solo acá.
+                        </p>
+                        {% endif %}
+                    {% endif %}
+
+                    {% if paso.formulario %}
+                    <a class="guia-link guia-link-form"
+                       href="{{ paso.formulario }}"
+                       target="_blank" rel="noopener noreferrer">
+                        <span class="guia-link-icono">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M8 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2"/>
+                                <rect x="8" y="2" width="8" height="4" rx="1"/>
+                                <path d="M9 12l2 2 4-4"/>
+                            </svg>
+                        </span>
+                        <span class="guia-link-texto">
+                            <span class="guia-link-nombre">Completar el formulario de solicitud</span>
+                            <span class="guia-link-detalle">Se abre en otra pestaña</span>
+                        </span>
+                        <span class="guia-link-flecha" aria-hidden="true">↗</span>
+                    </a>
+                    {% endif %}
+                </div>
+            </li>
+            {% endfor %}
+        </ol>
+    </div>
+
+    {# PDFs sueltos en static/docs/: material que no es de ningún paso. El
+       bloque no se muestra si no hay ninguno. #}
+    {% if documentos %}
+    <div class="guia-bloque">
+        <h2>Otros documentos</h2>
+        <p>Material de consulta que no forma parte del trámite.</p>
+
         <ul class="doc-lista">
             {% for doc in documentos %}
             <li>
@@ -33,13 +106,8 @@
             </li>
             {% endfor %}
         </ul>
-        {% else %}
-        <p class="doc-vacio">
-            Todavía no hay documentos publicados. Para publicar uno, copiá el PDF
-            en <code>static/docs/</code> y aparece solo en esta lista.
-        </p>
-        {% endif %}
     </div>
+    {% endif %}
 
     <div class="guia-bloque">
         <h2>Cómo cargar una investigación</h2>
