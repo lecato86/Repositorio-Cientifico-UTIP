@@ -63,10 +63,11 @@ body {
     color: var(--sc-navy);
 }
 
-/* El logo es la marca: trae el nombre adentro, no lleva texto al lado. */
+/* Marca: el círculo del logo + el nombre al lado, en texto. */
 .brand {
     display: flex;
     align-items: center;
+    gap: 12px;
     padding-right: 8px;
     text-decoration: none;
 }
@@ -75,8 +76,44 @@ body {
    que se le da acá es la del dibujo, sin aire alrededor. El atributo height del
    HTML lleva el mismo valor para que no salte el layout mientras carga. */
 .brand img {
-    height: 52px;
+    height: 46px;
     width: auto;
+}
+
+/* Dos líneas, con la misma jerarquía que el logo: el nombre arriba en chico y
+   la sigla abajo en grande. En una sola línea el texto se come el ancho que
+   necesita el nav. */
+.brand .wordmark {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+    white-space: nowrap;
+}
+
+.brand .wordmark-linea {
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--sc-muted);
+}
+
+.brand .wordmark-sigla {
+    font-size: 23px;
+    font-weight: 800;
+    letter-spacing: .02em;
+    background: var(--sc-grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+/* En pantalla angosta el nav ya usa todo el ancho: queda el logo solo, que se
+   sigue entendiendo. */
+@media (max-width: 720px) {
+    .brand .wordmark {
+        display: none;
+    }
 }
 
 .nav {

@@ -10,10 +10,17 @@
 <body>
 <div class="overlay"></div>
 <header class="header">
-    {# El logo ya trae el nombre escrito, así que no lleva wordmark al lado. #}
+    {# En la barra va el círculo del logo y el nombre al lado en texto: el
+       logo.png completo trae el nombre adentro, y a esta altura sus letras
+       quedan de unos 6px. El logo entero se usa en el login, que tiene lugar.
+       El texto es decorativo (el nombre ya lo da el alt de la imagen). #}
     <a class="brand" href="{{ url_for('estudios.inicio') }}">
-        <img src="{{ url_for('static', filename='logo.png') }}" alt="Repositorio Científico UTIP" height="52"
-             onerror="this.style.display='none'">
+        <img src="{{ url_for('static', filename='logo-icono.png') }}" alt="Repositorio Científico UTIP"
+             height="46" onerror="this.style.display='none'">
+        <span class="wordmark" aria-hidden="true">
+            <span class="wordmark-linea">Repositorio Científico</span>
+            <span class="wordmark-sigla">UTIP</span>
+        </span>
     </a>
     <nav class="nav">
         <a href="{{ url_for('estudios.inicio') }}" {% if request.endpoint == 'estudios.inicio' %}class="active"{% endif %}>
