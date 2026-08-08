@@ -6,16 +6,20 @@
     padding: 8px 0 40px;
 }
 
+/* Solo el título: debajo no va nada, por eso el margen inferior es mayor
+   que el superior. */
 .inicio-head {
     text-align: center;
-    margin: 18px 0 30px;
+    margin: 26px 0 34px;
 }
 
+/* En mayúsculas: el espaciado entre letras se abre un poco, si no las
+   versales quedan apretadas. */
 .inicio-head h1 {
     margin: 0;
     font-size: 32px;
     font-weight: 800;
-    letter-spacing: -.6px;
+    letter-spacing: 1.2px;
     color: var(--sc-navy);
 }
 
@@ -24,12 +28,6 @@
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-}
-
-.inicio-head p {
-    margin: 8px 0 0;
-    color: var(--sc-muted);
-    font-size: 14.5px;
 }
 
 /* Grilla de opciones: 2 x 2 en escritorio, 1 columna en celular */

@@ -76,9 +76,19 @@ try:
         # --- el menu tiene las 4 opciones ---
         print("\nMenu de inicio:")
         html = c.get("/").get_data(as_text=True)
-        for opcion in ["Cargar nueva investigaci", "Consultar repositorio",
-                       "Modificar investigaci", "Cómo comenzar"]:
+        for opcion in ["Cargar una investigación", "Consultar el repositorio",
+                       "Modificar una investigación", "Cómo comenzar"]:
             check(f"opcion '{opcion}'", opcion in html)
+
+        check("el titulo va en mayusculas",
+              "REPOSITORIO CIENTÍFICO <span>UTIP</span>" in html)
+        check("debajo del titulo no hay bajada",
+              "Unidad de Terapia Intensiva" not in html)
+
+        # Los acentos tienen que llegar bien al navegador: este archivo ya
+        # estuvo guardado con la codificacion rota y en pantalla se leia
+        # "CientÃ­fico". Se chequea en TODAS las pantallas mas abajo.
+        check("el titulo no tiene caracteres rotos", "Ã" not in html)
 
         # --- el formulario tiene las 4 preguntas y sus opciones ---
         print("\nFormulario (apartado Sobre el estudio):")
@@ -266,6 +276,16 @@ try:
         )
         _c.close()
         check("solo queda la tabla estudios", tablas == ["estudios"], str(tablas))
+
+        # --- acentos: ninguna pantalla con la codificacion rota ---
+        # "Ã", "Â" y "â€" son lo que se ve cuando bytes UTF-8 se guardaron
+        # leidos como Latin-1. Ya paso con inicio.html.
+        print("\nCodificacion (acentos):")
+        for ruta in ["/login", "/", "/nueva-investigacion", "/repositorio",
+                     "/modificar", "/como-comenzar"]:
+            texto = c.get(ruta).get_data(as_text=True)
+            rotos = {m: texto.count(m) for m in ("Ã", "Â", "â€") if m in texto}
+            check(f"{ruta} sin caracteres rotos", not rotos, str(rotos))
 
 except Exception:
     print("\nEXCEPCION:")
