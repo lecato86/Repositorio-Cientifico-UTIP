@@ -173,18 +173,27 @@
                     {% for clave, etiqueta in columnas %}
                     <td class="{% if clave in columnas_fijas %}repo-fija repo-fija-{{ clave }}{% endif %}
                                {%- if clave in columnas_largas %} repo-larga{% endif %}">
-                        {% if clave == 'titulo' %}
-                        <a class="repo-link-detalle"
-                           href="{{ url_for('estudios.detalle', estudio_id=est['id']) }}">
-                            {{ est[clave] or 'Sin título' }}
-                        </a>
-                        {% elif est[clave] and clave in columnas_enlace %}
-                        {# Ya viene normalizada a http/https desde el guardado. #}
-                        <a class="repo-link-publicacion" href="{{ est[clave] }}"
-                           target="_blank" rel="noopener noreferrer">{{ est[clave] }}</a>
-                        {% else %}
-                        {{ est[clave] if est[clave] not in (None, '') else '—' }}
-                        {% endif %}
+                        {# El contenido va dentro de un <div>, y NO por gusto: el
+                           `max-width` de un <td> lo ignora el layout automático
+                           de la tabla, que dimensiona cada columna por su
+                           contenido más largo. En el div sí se respeta, y así la
+                           columna de título deja de estirarse (siendo sticky,
+                           tapaba el resto de la tabla al scrollear). #}
+                        <div class="repo-celda">
+                            {% if clave == 'titulo' %}
+                            <a class="repo-link-detalle"
+                               title="{{ est[clave] or 'Sin título' }}"
+                               href="{{ url_for('estudios.detalle', estudio_id=est['id']) }}">
+                                {{ est[clave] or 'Sin título' }}
+                            </a>
+                            {% elif est[clave] and clave in columnas_enlace %}
+                            {# Ya viene normalizada a http/https desde el guardado. #}
+                            <a class="repo-link-publicacion" href="{{ est[clave] }}"
+                               target="_blank" rel="noopener noreferrer">{{ est[clave] }}</a>
+                            {% else %}
+                            {{ est[clave] if est[clave] not in (None, '') else '—' }}
+                            {% endif %}
+                        </div>
                     </td>
                     {% endfor %}
                     <td class="repo-acciones">
