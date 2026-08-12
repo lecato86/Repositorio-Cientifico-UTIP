@@ -515,13 +515,26 @@
     background: var(--sc-field);
 }
 
+/* El ancho de las columnas se limita ACÁ, en el div de adentro de la celda, y
+   no en el `<td>`: con `table-layout` automático (el default) el navegador
+   ignora el `max-width` de una celda y dimensiona cada columna por su
+   contenido más largo. Puesto en un bloque de adentro sí se respeta. Sin esto
+   la columna de título crecía sin límite y, al ser `sticky`, se quedaba quieta
+   tapando el resto de la tabla al scrollear en horizontal. */
+.repo-celda {
+    display: block;
+}
+
 /* Columnas con texto largo (enunciados, opciones completas): en vez de estirar
    la tabla a lo ancho, se limitan y parten en varias líneas. */
 .repo-larga {
     white-space: normal;
-    min-width: 220px;
-    max-width: 340px;
     line-height: 1.4;
+}
+
+.repo-larga .repo-celda {
+    min-width: 200px;
+    max-width: 320px;
 }
 
 /* Columnas fijas al scrollear en horizontal */
@@ -532,8 +545,6 @@
 }
 
 .repo-fija-titulo {
-    min-width: 240px;
-    max-width: 320px;
     white-space: normal;
     font-weight: 600;
     line-height: 1.35;
@@ -541,6 +552,20 @@
     /* Sombra al borde derecho: deja ver que el resto de la tabla pasa por
        debajo, en vez de parecer que los textos se pisan. */
     box-shadow: 6px 0 8px -6px rgba(var(--sc-tinta-rgb), .22);
+}
+
+/* Ancho FIJO, no un rango: esta columna es la que queda quieta al scrollear,
+   así que su ancho tiene que ser predecible. Un título largo se corta a tres
+   líneas con puntos suspensivos; el texto completo está en el tooltip y en la
+   ficha, a un clic. Sin el corte, una investigación con título de tres
+   renglones dejaba la fila desproporcionada. */
+.repo-fija-titulo .repo-celda {
+    width: 260px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .repo-link-detalle {
@@ -1127,9 +1152,11 @@
         position: static;
     }
 
-    .repo-larga,
-    .repo-fija-titulo {
-        min-width: 180px;
+    /* Los anchos viven en el div de adentro de la celda (ver .repo-celda). */
+    .repo-larga .repo-celda,
+    .repo-fija-titulo .repo-celda {
+        width: auto;
+        min-width: 160px;
         max-width: none;
     }
 

@@ -494,6 +494,13 @@ try:
         # position:sticky de la columna de titulo.
         check("la tabla no recorta el sticky de la columna fija",
               "overflow: visible" in repo_css)
+        # El layout automatico de la tabla IGNORA el max-width de un <td>: la
+        # columna de titulo crecia sin limite y, siendo sticky, tapaba el resto
+        # al scrollear. El ancho tiene que estar en el div de adentro.
+        check("el ancho del titulo lo pone el div, no la celda",
+              ".repo-fija-titulo .repo-celda" in repo_css)
+        check("la tabla envuelve el contenido de cada celda",
+              'class="repo-celda"' in c.get(TABLA).get_data(as_text=True))
 
         # --- acentos: ninguna pantalla con la codificacion rota ---
         # "Ã", "Â" y "â€" son lo que se ve cuando bytes UTF-8 se guardaron
