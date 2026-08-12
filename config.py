@@ -97,6 +97,16 @@ class Config:
     # Vacía es válido: simplemente no hay administradores.
     ADMIN_DNIS = _parse_admin_dnis(os.environ.get("ADMIN_DNIS", ""))
 
+    # A quién escribirle para pedir que se archive o se borre una
+    # investigación. Se muestra al pie de la pantalla de modificar, en chico:
+    # nadie borra por su cuenta, se pide.
+    # Tienen valor por defecto para que el aviso aparezca sin configurar nada
+    # en el panel de Render; se pueden pisar por entorno. Vacías: no se muestra.
+    CONTACTO_ADMIN_MAIL = os.environ.get(
+        "CONTACTO_ADMIN_MAIL", "rossicatriel@gmail.com"
+    )
+    CONTACTO_ADMIN_TEL = os.environ.get("CONTACTO_ADMIN_TEL", "3512477329")
+
     # Servidor local (run_server.py / run_dev.py). En producción manda gunicorn.
     HOST = os.environ.get("HOST", "0.0.0.0")
     PORT = _parse_int(os.environ.get("PORT"), 5000)

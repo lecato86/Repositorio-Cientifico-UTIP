@@ -12,6 +12,17 @@
         ← Volver al repositorio
     </a>
 
+    {# Solo un admin llega acá con una archivada: la ruta manda al resto de
+       vuelta al repositorio. El cartel avisa por qué no está en la lista. #}
+    {% if archivada %}
+    <p class="ficha-archivada">
+        Esta investigación está <b>archivada</b>: no aparece en el repositorio.
+        {%- if e['archivado_en'] %} La archivó {{ e['archivado_por'] or 'un administrador' }}
+        el {{ e['archivado_en'] }}.{% endif %}
+        <a href="{{ url_for('estudios.archivados') }}">Ver archivadas →</a>
+    </p>
+    {% endif %}
+
     <header class="ficha-head">
         <span class="est-estado est-estado--{{ etapa }}">
             {{ e['estado_actual'] or 'Sin estado' }}

@@ -32,6 +32,13 @@
         <a href="{{ url_for('estudios.como_comenzar') }}" {% if request.endpoint == 'estudios.como_comenzar' %}class="active"{% endif %}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5.5A2 2 0 016 4h5v16H6a2 2 0 01-2-1.5z" stroke-linejoin="round"/><path d="M20 5.5A2 2 0 0018 4h-5v16h5a2 2 0 002-1.5z" stroke-linejoin="round"/></svg>Cómo comenzar</a>
 
+        {# Las investigaciones archivadas: solapa solo para un admin (los DNIs
+           de ADMIN_DNIS). Para el resto no existe, ni la solapa ni la ruta. #}
+        {% if current_user.is_authenticated and current_user.rol == 'admin' %}
+        <a href="{{ url_for('estudios.archivados') }}" {% if request.endpoint == 'estudios.archivados' %}class="active"{% endif %}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 001 1h12a1 1 0 001-1V8"/><path d="M10 12h4" stroke-linecap="round"/></svg>Archivados</a>
+        {% endif %}
+
         {% if current_user.is_authenticated %}
         <span class="nav-sep" aria-hidden="true"></span>
         <a class="nav-logout" href="{{ url_for('auth.logout') }}">
