@@ -367,11 +367,70 @@ try:
         check("con puntos entra como el mismo usuario y edita lo suyo",
               "btn-editar" in html)
 
-        # --- borrar: solo admin ---
-        print("\nBorrar (solo admin):")
+        # --- archivar / restaurar / borrar: solo admin ---
+        # Archivar saca la investigacion del repositorio pero la deja guardada;
+        # el borrado definitivo es un segundo paso, solo desde /archivados.
+        print("\nArchivar (solo admin):")
+        TITULO_BETO = "Estudio de Beto (corregido)"
+
+        r = c.post(f"/estudios/{id_beto}/archivar")
+        check("un usuario comun no puede archivar", r.status_code == 403,
+              f"status {r.status_code}")
         r = c.post(f"/estudios/{id_beto}/borrar")
         check("un usuario comun no puede borrar", r.status_code == 403,
               f"status {r.status_code}")
+        r = c.get("/archivados")
+        check("un usuario comun no ve los archivados", r.status_code == 403,
+              f"status {r.status_code}")
+        check("y no le aparece la solapa en el nav",
+              "Archivados" not in c.get("/").get_data(as_text=True))
+
+        c.get("/logout")
+        c.post("/login", data=ANA)   # admin (su DNI esta en ADMIN_DNIS)
+        check("al admin si le aparece la solapa",
+              "Archivados" in c.get("/").get_data(as_text=True))
+
+        # El borrado no esta a un clic: primero hay que archivar.
+        r = c.post(f"/estudios/{id_beto}/borrar")
+        check("no se borra lo que no esta archivado", r.status_code == 302,
+              f"status {r.status_code}")
+        check("la investigacion sigue existiendo",
+              TITULO_BETO in c.get(TABLA).get_data(as_text=True))
+
+        r = c.post(f"/estudios/{id_beto}/archivar")
+        check("el admin archiva", r.status_code == 302, f"status {r.status_code}")
+        check("la archivada sale del repositorio",
+              TITULO_BETO not in c.get(TABLA).get_data(as_text=True))
+        check("y no aparece en la busqueda por titulo",
+              TITULO_BETO not in
+              c.get("/modificar?titulo=Estudio+de+Beto").get_data(as_text=True))
+        check("aparece en la pantalla de archivados",
+              TITULO_BETO in c.get("/archivados").get_data(as_text=True))
+
+        # Ni su propio autor la ve ni la edita mientras esta archivada.
+        c.get("/logout")
+        c.post("/login", data=BETO)
+        r = c.get(f"/estudios/{id_beto}")
+        check("el autor no ve la ficha de una archivada", r.status_code == 302,
+              f"status {r.status_code}")
+        r = c.get(f"/estudios/{id_beto}/editar")
+        check("ni la puede editar", r.status_code == 403,
+              f"status {r.status_code}")
+
+        c.get("/logout")
+        c.post("/login", data=ANA)
+        r = c.post(f"/estudios/{id_beto}/restaurar")
+        check("el admin restaura", r.status_code == 302, f"status {r.status_code}")
+        check("y vuelve al repositorio",
+              TITULO_BETO in c.get(TABLA).get_data(as_text=True))
+
+        # Borrado definitivo: recien despues de archivar.
+        c.post(f"/estudios/{id_beto}/archivar")
+        r = c.post(f"/estudios/{id_beto}/borrar")
+        check("el admin borra una archivada", r.status_code == 302,
+              f"status {r.status_code}")
+        check("ya no queda en archivados",
+              TITULO_BETO not in c.get("/archivados").get_data(as_text=True))
 
         # --- ya no queda nada de OAFCare ---
         print("\nOAFCare eliminado:")
@@ -441,7 +500,7 @@ try:
         # leidos como Latin-1. Ya paso con inicio.html.
         print("\nCodificacion (acentos):")
         for ruta in ["/login", "/", "/nueva-investigacion", "/repositorio",
-                     "/modificar", "/como-comenzar"]:
+                     "/modificar", "/como-comenzar", "/archivados"]:
             texto = c.get(ruta).get_data(as_text=True)
             rotos = {m: texto.count(m) for m in ("Ã", "Â", "â€") if m in texto}
             check(f"{ruta} sin caracteres rotos", not rotos, str(rotos))

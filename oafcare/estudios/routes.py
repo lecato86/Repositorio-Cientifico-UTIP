@@ -6,7 +6,8 @@ from flask_login import login_required, current_user
 from . import estudios_bp
 from .models import (
     crear_estudio, actualizar_estudio, get_estudio, get_todos_estudios,
-    buscar_estudios_por_titulo, borrar_estudio, puede_modificar,
+    get_estudios_archivados, buscar_estudios_por_titulo, archivar_estudio,
+    restaurar_estudio, borrar_estudio, puede_modificar, esta_archivada,
 )
 from oafcare.auth.decorators import requiere_editor, requiere_admin
 from oafcare.utils.estudio import estudio_desde_form, faltantes
@@ -132,9 +133,16 @@ def detalle(estudio_id):
 
     Es la pantalla a la que se entra desde una tarjeta del repositorio. La
     puede ver cualquiera; el botón de modificar solo aparece para su autor.
+
+    Si está archivada, solo la ve un admin: para el resto la ficha no existe,
+    aunque tengan el link guardado de antes.
     """
     estudio = get_estudio(estudio_id)
     if not estudio:
+        return redirect(url_for("estudios.repositorio"))
+
+    archivada = esta_archivada(estudio)
+    if archivada and current_user.rol != "admin":
         return redirect(url_for("estudios.repositorio"))
 
     return render_template(
@@ -144,6 +152,7 @@ def detalle(estudio_id):
         columnas_enlace=COLUMNAS_ENLACE,
         etapa=etapa_de(estudio["estado_actual"]),
         puede_editar=puede_modificar(estudio, current_user),
+        archivada=archivada,
     )
 
 
@@ -235,14 +244,64 @@ def actualizar(estudio_id):
     return redirect(url_for("estudios.repositorio"))
 
 
-# ------------------ BORRAR (solo admin) ------------------
+# ------------------ ARCHIVAR / RESTAURAR / BORRAR (solo admin) ------------------
+#
+# Nadie borra una investigación de un clic. El circuito es en dos pasos:
+#   1. Archivar  -> sale del repositorio, la fila queda intacta. Reversible.
+#   2. Borrar    -> solo desde la vista de archivados, y no tiene vuelta atrás.
+# Las tres acciones son de admin (los DNIs de ADMIN_DNIS). Quien quiera que se
+# borre algo, lo pide: el contacto está en la pantalla de modificar.
+
+@estudios_bp.route("/archivados")
+@login_required
+@requiere_admin
+def archivados():
+    """Las investigaciones archivadas. Solo la ve un admin."""
+    estudios = get_estudios_archivados()
+
+    return render_template(
+        "estudios/archivados.html",
+        estudios=estudios,
+        etapas={e["id"]: etapa_de(e["estado_actual"]) for e in estudios},
+    )
+
+
+@estudios_bp.route("/estudios/<int:estudio_id>/archivar", methods=["POST"])
+@login_required
+@requiere_admin
+def archivar(estudio_id):
+    """Saca una investigación del repositorio, sin borrarla."""
+    if not get_estudio(estudio_id):
+        return redirect(url_for("estudios.repositorio"))
+
+    archivar_estudio(estudio_id, current_user.nombre)
+    return redirect(url_for("estudios.repositorio"))
+
+
+@estudios_bp.route("/estudios/<int:estudio_id>/restaurar", methods=["POST"])
+@login_required
+@requiere_admin
+def restaurar(estudio_id):
+    """Devuelve una investigación archivada al repositorio."""
+    restaurar_estudio(estudio_id)
+    return redirect(url_for("estudios.archivados"))
+
 
 @estudios_bp.route("/estudios/<int:estudio_id>/borrar", methods=["POST"])
 @login_required
 @requiere_admin
 def borrar(estudio_id):
-    borrar_estudio(estudio_id)
-    return redirect(url_for("estudios.repositorio"))
+    """Borrado definitivo. Solo sobre una investigación ya archivada.
+
+    Si todavía está en el repositorio no se borra nada: primero hay que
+    archivarla. Así el borrado nunca queda a un solo clic de distancia, ni
+    siquiera por una URL armada a mano.
+    """
+    estudio = get_estudio(estudio_id)
+    if estudio and esta_archivada(estudio):
+        borrar_estudio(estudio_id)
+
+    return redirect(url_for("estudios.archivados"))
 
 
 # ------------------ CÓMO COMENZAR ------------------

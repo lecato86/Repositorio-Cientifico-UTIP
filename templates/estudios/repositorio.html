@@ -126,11 +126,14 @@
                     <a class="btn-editar"
                        href="{{ url_for('estudios.editar', estudio_id=est['id']) }}">Modificar</a>
                     {% endif %}
+                    {# Archivar, no borrar: la investigación sale del
+                       repositorio pero queda guardada, y se puede restaurar
+                       desde la solapa "Archivados". #}
                     {% if current_user.rol == 'admin' %}
-                    <form action="{{ url_for('estudios.borrar', estudio_id=est['id']) }}"
-                          method="post" class="repo-borrar"
-                          onsubmit="return confirm('¿Borrar DEFINITIVAMENTE la investigación &quot;{{ est['titulo'] }}&quot;?\n\nEsta acción NO se puede deshacer.');">
-                        <button type="submit">Borrar</button>
+                    <form action="{{ url_for('estudios.archivar', estudio_id=est['id']) }}"
+                          method="post" class="repo-archivar"
+                          onsubmit="return confirm('¿Archivar la investigación &quot;{{ est['titulo'] }}&quot;?\n\nDeja de aparecer en el repositorio, pero no se borra: la vas a encontrar en la solapa Archivados y podés restaurarla cuando quieras.');">
+                        <button type="submit">Archivar</button>
                     </form>
                     {% endif %}
                 </span>
@@ -190,10 +193,10 @@
                            href="{{ url_for('estudios.editar', estudio_id=est['id']) }}">Modificar</a>
                         {% endif %}
                         {% if current_user.rol == 'admin' %}
-                        <form action="{{ url_for('estudios.borrar', estudio_id=est['id']) }}"
-                              method="post" class="repo-borrar"
-                              onsubmit="return confirm('¿Borrar DEFINITIVAMENTE la investigación &quot;{{ est['titulo'] }}&quot;?\n\nEsta acción NO se puede deshacer.');">
-                            <button type="submit">Borrar</button>
+                        <form action="{{ url_for('estudios.archivar', estudio_id=est['id']) }}"
+                              method="post" class="repo-archivar"
+                              onsubmit="return confirm('¿Archivar la investigación &quot;{{ est['titulo'] }}&quot;?\n\nDeja de aparecer en el repositorio, pero no se borra: la vas a encontrar en la solapa Archivados y podés restaurarla cuando quieras.');">
+                            <button type="submit">Archivar</button>
                         </form>
                         {% endif %}
                     </td>

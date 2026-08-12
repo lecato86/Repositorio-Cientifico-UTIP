@@ -1147,3 +1147,112 @@
         flex: 1 1 100%;
     }
 }
+
+/* ------------------------------------------------------------
+   Archivar / restaurar / borrar
+   ------------------------------------------------------------
+   Archivar NO es destructivo (la investigación queda guardada y se puede
+   restaurar), así que su botón es neutro: el rojo se reserva para el borrado
+   definitivo, que solo existe en la pantalla de archivados. */
+
+.repo-archivar,
+.repo-restaurar {
+    display: inline;
+    margin-left: 6px;
+}
+
+.repo-archivar button {
+    width: auto;
+    padding: 5px 10px;
+    font-size: 11.5px;
+    font-weight: 700;
+    border-radius: 8px;
+    background: var(--sc-field);
+    color: var(--sc-muted);
+    border: 1px solid var(--sc-field-line);
+    box-shadow: none;
+}
+
+.repo-archivar button:hover {
+    background: #fff7ed;
+    color: #9a3412;
+    border-color: #fed7aa;
+}
+
+.repo-restaurar button {
+    width: auto;
+    padding: 5px 10px;
+    font-size: 11.5px;
+    font-weight: 700;
+    border-radius: 8px;
+    background: var(--sc-grad-fuerte);
+    box-shadow: none;
+}
+
+/* ------------------------------------------------------------
+   Pantalla de archivados (solo admin)
+   ------------------------------------------------------------ */
+
+.arch-ayuda {
+    margin: 0 0 22px;
+    padding: 14px 16px;
+    border-radius: 11px;
+    border: 1px solid var(--sc-line);
+    background: var(--sc-field);
+    color: var(--sc-muted);
+    font-size: 13.5px;
+    line-height: 1.6;
+}
+
+/* Atenuada: se ve que no está en circulación. Vuelve a color al pasar por
+   encima, para poder leerla sin esfuerzo. */
+.est-card--archivada {
+    opacity: .78;
+    filter: saturate(.55);
+}
+
+.est-card--archivada:hover {
+    opacity: 1;
+    filter: none;
+}
+
+/* Cartel de la ficha de una investigación archivada. */
+.ficha-archivada {
+    margin: 0 0 18px;
+    padding: 13px 16px;
+    border-radius: 11px;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    color: #9a3412;
+    font-size: 13.5px;
+    line-height: 1.6;
+}
+
+.ficha-archivada a {
+    color: #9a3412;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* ------------------------------------------------------------
+   Contacto para pedir la baja de una investigación (pie de "Modificar")
+   ------------------------------------------------------------
+   Discreto a propósito: es un dato de servicio, no una llamada a la acción.
+   No se borra solo, se pide. */
+
+.inv-contacto {
+    margin: 14px 2px 0;
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--sc-muted);
+    text-align: center;
+}
+
+.inv-contacto a {
+    color: var(--sc-muted);
+    text-decoration: underline;
+}
+
+.inv-contacto a:hover {
+    color: var(--sc-blue);
+}

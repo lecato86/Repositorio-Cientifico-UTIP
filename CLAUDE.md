@@ -28,7 +28,7 @@ oafcare/
   estudios/             # Blueprint ÚNICO: el repositorio de investigaciones
     models.py           # SQL de la tabla `estudios` + puede_modificar()
     routes.py           # /, /nueva-investigacion, /repositorio, /estudios/<id>,
-                        # /modificar, /como-comenzar
+                        # /modificar, /como-comenzar, /archivados (admin)
   utils/
     estudio.py          # Formulario: opciones, ESTUDIO_COLUMNAS, parsers
     repositorio.py      # Columnas y agrupación de la vista "Consultar repositorio"
@@ -40,7 +40,7 @@ templates/
   base.html             # Layout + navbar
   auth/login.html       # Ingreso: nombre y apellido + DNI
   estudios/             # inicio, nueva, _apartados, repositorio, detalle,
-                        # modificar, como_comenzar, no_autorizado
+                        # modificar, archivados, como_comenzar, no_autorizado
 static/
   css/                  # base.css, login.css, inicio.css, estudio.css, repositorio.css
   js/                   # ingreso_wizard.js, estudio_form.js, repositorio.js
@@ -72,8 +72,16 @@ static/
 - **No hay passwords ni tabla de usuarios.** En `/login` se completan dos campos: **nombre y apellido** y **DNI**. Con eso se entra.
 - La identidad **vive en la cookie de sesión** (firmada con `SECRET_KEY`): `Usuario.get_id()` devuelve `"<dni>|<nombre>"` y el `user_loader` la reconstruye en cada request. No hay nada que persistir.
 - **El DNI es la identidad**, no el nombre: los nombres se repiten y se escriben distinto. `normalizar_dni()` deja solo los dígitos, así `30.123.456` y `30123456` son la misma persona. El nombre es solo para mostrar.
-- **Roles:** todo el que entra es `editor` (puede cargar y editar lo suyo). Es `admin` si su DNI está en `ADMIN_DNIS` del `.env`; lo único que suma es **borrar** registros. `Usuario.rol` es una property que lee la config en cada request, así que cambiar `ADMIN_DNIS` tiene efecto al reiniciar, sin tocar nada más.
+- **Roles:** todo el que entra es `editor` (puede cargar y editar lo suyo). Es `admin` si su DNI está en `ADMIN_DNIS` del `.env`; lo que suma es **archivar** investigaciones, ver la solapa **Archivados** y borrarlas definitivamente desde ahí (ver "Archivar en vez de borrar"). `Usuario.rol` es una property que lee la config en cada request, así que cambiar `ADMIN_DNIS` tiene efecto al reiniciar, sin tocar nada más.
 - Las rutas de escritura llevan `requiere_editor` / `requiere_admin` de `oafcare/auth/decorators.py`.
+
+### Archivar en vez de borrar
+- **Nadie borra una investigación de un clic.** El circuito tiene dos pasos y los dos son de admin: **archivar** la saca del repositorio dejando la fila intacta (reversible), y **borrar** solo existe dentro de la vista de archivados y no tiene vuelta atrás. `estudios.borrar` chequea `esta_archivada()` antes de ejecutar: un POST a esa URL sobre una investigación activa no borra nada.
+- **El estado vive en `archivado_en`** (columna de `ESTUDIO_COLUMNAS_META`, no del formulario): con fecha está archivada, vacía o NULL está activa. `archivado_por` guarda el nombre de quien la archivó. Las constantes `SOLO_ACTIVAS` / `SOLO_ARCHIVADAS` de `estudios/models.py` son el trozo de SQL que hace el filtro; comparan contra `NULL` **y** contra `''` porque las filas migradas quedan en NULL y las nuevas pueden guardarse vacías.
+- **Una archivada desaparece de todos lados menos de `/archivados`**: `get_todos_estudios()` y `buscar_estudios_por_titulo()` la excluyen, `estudios.detalle` manda al repositorio a quien no sea admin (aunque tenga el link viejo), y `puede_modificar()` devuelve `False` — ni su propio autor la edita mientras esté archivada. **Ese chequeo está dentro de `puede_modificar`** a propósito: es por donde pasan las rutas de edición y los botones de las vistas, así que alcanza con ese único lugar. Si agregás una consulta que lista investigaciones, filtrala con `SOLO_ACTIVAS`.
+- **La solapa "Archivados" del navbar solo se renderiza para un admin**, y la ruta además lleva `@requiere_admin`: esconder el link nunca es la protección.
+- El botón del repositorio dice **Archivar** y es neutro (`.repo-archivar`); el rojo (`.repo-borrar`) queda reservado para el borrado definitivo, que solo aparece en `archivados.html`.
+- **Quien no es admin no archiva ni borra: lo pide.** Al pie de `modificar.html` hay una nota chica con el contacto, que sale de `CONTACTO_ADMIN_MAIL` / `CONTACTO_ADMIN_TEL` (en `Config`, con valor por defecto para que ande sin configurar nada en Render). Si las dos están vacías, la nota no se muestra. Va ahí y no en el inicio a propósito: en el menú principal lo vería todo el mundo todo el tiempo.
 
 ### Propiedad de las investigaciones
 - **Consultar puede cualquiera; modificar, solo quien la cargó.** `crear_estudio` guarda `creado_por` (nombre, para mostrar) y `creado_por_dni` (la identidad).
@@ -118,7 +126,7 @@ static/
 ### Tabla `estudios`
 - Una fila por investigación, PK `id` autoincremental (`SERIAL` en Postgres, `INTEGER ... AUTOINCREMENT` en SQLite). Todas las columnas del formulario son TEXT.
 - **Las columnas se generan desde `ESTUDIO_COLUMNAS`** (en `utils/estudio.py`): `_estudios_columnas_sql()` arma el `CREATE TABLE` en los dos motores y las migraciones agregan las que falten (`ADD COLUMN IF NOT EXISTS` en Postgres, `_add_column_if_missing` en SQLite). Agregar un campo es una línea en esa lista.
-- Además, las columnas de `ESTUDIO_COLUMNAS_META` (en `database.py`, también migradas en los dos motores): `creado_por` (nombre del autor), `creado_por_dni` (su DNI — el que decide quién puede editar), `creado_en`, `actualizado_en`.
+- Además, las columnas de `ESTUDIO_COLUMNAS_META` (en `database.py`, también migradas en los dos motores): `creado_por` (nombre del autor), `creado_por_dni` (su DNI — el que decide quién puede editar), `creado_en`, `actualizado_en`, `archivado_en` y `archivado_por` (ver "Archivar en vez de borrar"). **Van acá y no en `ESTUDIO_COLUMNAS`**: esa lista es la del formulario y `actualizar_estudio` la sobrescribe entera en cada edición, así que una columna de estado ahí se borraría sola al guardar.
 - `crear_estudio` **no devuelve el id**: obtenerlo difiere entre SQLite (`lastrowid`) y Postgres (`RETURNING`), y ningún flujo lo necesita porque después de guardar se va al repositorio. No agregar esa dependencia sin resolver los dos motores.
 - `actualizar_estudio` escribe **todas** las columnas del formulario (sin `COALESCE`): el form manda siempre el conjunto completo y un campo borrado a propósito tiene que quedar vacío.
 

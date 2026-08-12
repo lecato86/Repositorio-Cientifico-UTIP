@@ -74,5 +74,21 @@
         {% endif %}
         {% endif %}
     </div>
+
+    {# Nadie borra investigaciones por su cuenta: se piden. Va acá, al pie de
+       la pantalla de modificar, porque es donde está quien quiere cambiar algo
+       de un registro; en el inicio lo vería todo el mundo todo el tiempo.
+       Los datos salen de la config (CONTACTO_ADMIN_*): si están vacíos no se
+       muestra nada. #}
+    {% if config.CONTACTO_ADMIN_MAIL or config.CONTACTO_ADMIN_TEL %}
+    <p class="inv-contacto">
+        ¿Necesitás dar de baja una investigación? Escribinos:
+        {%- if config.CONTACTO_ADMIN_MAIL %}
+        <a href="mailto:{{ config.CONTACTO_ADMIN_MAIL }}">{{ config.CONTACTO_ADMIN_MAIL }}</a>
+        {%- endif %}
+        {%- if config.CONTACTO_ADMIN_MAIL and config.CONTACTO_ADMIN_TEL %} · {% endif %}
+        {%- if config.CONTACTO_ADMIN_TEL %}{{ config.CONTACTO_ADMIN_TEL }}{% endif %}
+    </p>
+    {% endif %}
 </section>
 {% endblock %}

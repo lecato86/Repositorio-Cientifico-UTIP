@@ -29,11 +29,18 @@ except ImportError:  # psycopg solo hace falta en producción (Postgres)
 # Columnas de `estudios` que NO son del formulario: quién la cargó y cuándo.
 # `creado_por` es el nombre para mostrar y `creado_por_dni` la identidad real:
 # es la que se compara para decidir si alguien puede modificar el registro.
+#
+# `archivado_en` es el archivado: con fecha, la investigación sale del
+# repositorio y queda solo en la vista de archivados (que ve únicamente un
+# admin). Vacía o NULL = activa. NO se borra la fila: archivar es reversible y
+# el borrado definitivo es un segundo paso deliberado desde esa vista.
 ESTUDIO_COLUMNAS_META = [
     "creado_por",
     "creado_por_dni",
     "creado_en",
     "actualizado_en",
+    "archivado_en",
+    "archivado_por",
 ]
 
 # Tablas de OAFCare (seguimiento de pacientes en OAF). El proyecto derivaba de
@@ -194,7 +201,9 @@ def _init_postgres() -> None:
                 creado_por TEXT,
                 creado_por_dni TEXT,
                 creado_en TEXT,
-                actualizado_en TEXT
+                actualizado_en TEXT,
+                archivado_en TEXT,
+                archivado_por TEXT
             )""")
 
             # Bases ya existentes: agregar las columnas que falten.
@@ -223,7 +232,9 @@ def _init_sqlite() -> None:
         creado_por TEXT,
         creado_por_dni TEXT,
         creado_en TEXT,
-        actualizado_en TEXT
+        actualizado_en TEXT,
+        archivado_en TEXT,
+        archivado_por TEXT
     )""")
     conn.commit()
 

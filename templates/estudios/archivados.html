@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Archivados — Repositorio Científico UTIP{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/repositorio.css') }}">
+{% endblock %}
+{% block content %}
+{# Investigaciones sacadas del repositorio. Esta pantalla la ve SOLO un admin
+   (la ruta lleva @requiere_admin y la solapa del navbar tampoco aparece para
+   el resto). Desde acá se restaura o se borra para siempre. #}
+<section class="repo archivados">
+    <header class="repo-head">
+        <div>
+            <h1>Investigaciones archivadas</h1>
+            <p>
+                Salieron del repositorio pero no se borraron. Nadie más que vos
+                las ve.
+            </p>
+        </div>
+        <a class="repo-volver" href="{{ url_for('estudios.repositorio') }}">← Repositorio</a>
+    </header>
+
+    {% if not estudios %}
+    <p class="repo-vacio">
+        No hay ninguna investigación archivada.
+    </p>
+    {% else %}
+
+    <p class="arch-ayuda">
+        <b>Restaurar</b> la devuelve al repositorio tal como estaba.
+        <b>Borrar definitivamente</b> elimina la investigación y todos sus datos
+        de la base: eso no se puede deshacer y no hay forma de recuperarla.
+    </p>
+
+    <div class="repo-tarjetas">
+        {% for est in estudios %}
+        <article class="est-card est-card--archivada">
+            <a class="est-card-link" href="{{ url_for('estudios.detalle', estudio_id=est['id']) }}">
+                <span class="est-estado est-estado--{{ etapas[est['id']] }}">
+                    {{ est['estado_actual'] or 'Sin estado' }}
+                </span>
+
+                <h2 class="est-titulo">{{ est['titulo'] or 'Sin título' }}</h2>
+
+                {% if est['tema'] %}
+                <p class="est-tema">{{ est['tema'] }}</p>
+                {% endif %}
+
+                <dl class="est-datos">
+                    {% if est['director'] %}
+                    <div><dt>Director</dt><dd>{{ est['director'] }}</dd></div>
+                    {% endif %}
+                    <div>
+                        <dt>Archivada</dt>
+                        <dd>
+                            {{ est['archivado_en'] or '—' }}
+                            {%- if est['archivado_por'] %} · por {{ est['archivado_por'] }}{% endif %}
+                        </dd>
+                    </div>
+                </dl>
+            </a>
+
+            <footer class="est-pie">
+                <span class="est-autor">
+                    Cargada por {{ est['creado_por'] or '—' }}
+                    {%- if est['creado_en'] %} · {{ est['creado_en'][:10] }}{% endif %}
+                </span>
+                <span class="est-acciones">
+                    <form action="{{ url_for('estudios.restaurar', estudio_id=est['id']) }}"
+                          method="post" class="repo-restaurar">
+                        <button type="submit">Restaurar</button>
+                    </form>
+                    {# El único lugar de la app donde se borra de verdad: la
+                       ruta rechaza el borrado de una investigación que no esté
+                       archivada. Llegar hasta acá ya fue un paso deliberado; el
+                       confirm es el último aviso. #}
+                    <form action="{{ url_for('estudios.borrar', estudio_id=est['id']) }}"
+                          method="post" class="repo-borrar"
+                          onsubmit="return confirm('¿Borrar DEFINITIVAMENTE la investigación &quot;{{ est['titulo'] }}&quot;?\n\nSe elimina de la base con todos sus datos. Esta acción NO se puede deshacer.');">
+                        <button type="submit">Borrar definitivamente</button>
+                    </form>
+                </span>
+            </footer>
+        </article>
+        {% endfor %}
+    </div>
+    {% endif %}
+</section>
+{% endblock %}
